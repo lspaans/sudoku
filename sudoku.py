@@ -48,6 +48,9 @@ class Cell(object):
     def __str__(self):
         return str(self.__value)
 
+    def __repr__(self):
+        return self.__str__()
+
 class Tile(object):
     def __init__(self, values=[], gridBase=DEF_GRID_BASE):
         self.__gridBase = gridBase
@@ -70,11 +73,16 @@ class Tile(object):
 
     def __str__(self):
         out = ""
-        for n, c in enumerate(self.cells):
-            if n % self.__gridBase == 0 and n != 0:
-                out += "\n"
-            out += str(c.value)
+        for y in xrange(self.__gridBase):
+            s = y * self.__gridBase
+            e = s + self.__gridBase
+            out += "{0}\n".format(
+                    " ".join(map(lambda c: str(c), self.cells[s:e]))
+            )
         return out
+
+    def __repr__(self):
+        return self.__str__()
 
 class Board(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
@@ -102,5 +110,6 @@ class Game(object):
 if __name__ == '__main__':
     os.system('clear')
     b = Board()
-    print str(b.tiles[0])
+    for n, t in enumerate(b.tiles):
+        print "[{0}]\n{1}".format(n, repr(t))
 
