@@ -1,106 +1,375 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-import os
+import sys
 
-DEF_GRID_BASE = 3
+from collections import OrderedDict
+
+
+class Unsolvable(Exception):
+    pass
+
 
 class Cell(object):
-    def __init__(self, value=None, gridBase=DEF_GRID_BASE, options=[]):
-        self.__gridBase = gridBase
-        self.maxValue = self.__gridBase ** 2
-        self.allOptions = range(1, self.maxValue + 1)
-        self.options = self.allOptions
+    def __init__(self, value):
+        self._value = None
         self.value = value
 
-    @property
-    def maxValue(self):
-        return self.__maxValue
+    def get_value(self):
+        return self._value
 
-    @property
-    def options(self):
-        return tuple(self.__options)
+    def set_value(self, value):
+        if not isinstance(value, int) or value < 0 or value > 9:
+            raise ValueError("invalid value: \"{}\"".format(value))
 
-    @property
-    def value(self):
-        return self.__value
+        self._value = value
 
-    @maxValue.setter
-    def maxValue(self, maxValue):
-        self.__maxValue = maxValue
+    def show(self):
+        sys.stdout.write(str(self))
 
-    @options.setter
-    def options(self, options=[]):
-        self.__options = set(options)
-
-    def delOptions(self, options=[]):
-       self.options = tuple(set(self.options) - set(options))
-
-    @value.setter
-    def value(self, value=None):
-        if value in self.options:
-            self.__value, self.options = value, [value]
-        elif value is None:
-            self.__value = None 
-            self.options = self.allOptions
-        else:
-            raise ValueError("Invalid value")
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, self.value)
 
     def __str__(self):
-        return str(self.__value)
+        return " {} ".format(self.value if self.value != 0 else '.')
 
-class Tile(object):
-    def __init__(self, values=[], gridBase=DEF_GRID_BASE):
-        self.__gridBase = gridBase
-        self.__maxCells = self.__gridBase ** 2
-        self.cells = values
+    value = property(get_value, set_value)
 
-    @property
-    def cells(self):
-        return self.__cells
 
-    @cells.setter
-    def cells(self, values=None):
-        if values is None or len(values) == 0:
-            values = range(1, self.__maxCells + 1)
+class CellList(object):
+    _FORCE_UNIQUE = True
+    _GROUP_BY = 9
+    _NUMBER_OF_CELLS = 9
 
-        if len(set(values)) != self.__maxCells and set(values) != set([None]):
-            raise ValueError("Non-unique or invalid number of values")
+    def __init__(self, cells):
+        self._cells = None
+        self.cells = cells
 
-        self.__cells = [Cell(v) for v in values]
+    def __getitem__(self, idx):
+        return self.cells[idx]
+
+    def __setitem__(self, idx, cell):
+        self.cells[idx].value = cell.value
+
+    @classmethod
+    def from_text(cls, text):
+        return cls([Cell(int(c) if c.isdigit() else 0) for c in text])
+
+    def get_cells(self):
+        return self._cells
+
+    def set_cells(self, cells):
+        self._cells = []
+
+        if not isinstance(cells, (list, tuple)):
+            raise TypeError(
+                "invalid argument type: \"{}\"".format(type(cells).__name__)
+            )
+        if len(cells) != self._NUMBER_OF_CELLS:
+            raise ValueError("wrong number of cells")
+        for n, cell in enumerate(cells):
+            if not isinstance(cell, Cell):
+                raise TypeError(
+                    "invalid argument type in cell list: \"{}\"".format(
+                        type(cell).__name__
+                    )
+                )
+            if (
+                cell.value == 0 or
+                not self._FORCE_UNIQUE or (
+                    self._FORCE_UNIQUE and
+                    cell not in self
+                )
+            ):
+                self._cells.append(cell)
+            else:
+                raise ValueError(
+                    "duplicate cell value: \"{}\"".format(cell.value)
+                )
+
+    def get_empty_cell_indices(self):
+        return [n for n, cell in enumerate(self.cells) if cell.value == 0]
+
+    def get_missing_numbers(self):
+        return list(
+            set(range(1, 10)) - set([cell.value for cell in self.cells])
+        )
+
+    def show(self):
+        sys.stdout.write(str(self))
+
+    def __contains__(self, cell):
+        if not isinstance(cell, Cell):
+            raise TypeError(
+                "invalid argument type: \"{}\"".format(cell.__class__.__name__)
+            )
+
+        return cell.value in [c.value for c in self.cells]
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.cells))
 
     def __str__(self):
-        out = ""
-        for n, c in enumerate(self.cells):
-            if n % self.__gridBase == 0 and n != 0:
-                out += "\n"
-            out += str(c.value)
-        return out
+        return "".join(
+            (
+                str(cell) + ("" if n % self._GROUP_BY else "\n")
+            ) for n, cell in enumerate(self.cells, start=1)
+        )
+
+    cells = property(get_cells, set_cells)
+    empty_cell_indices = property(get_empty_cell_indices)
+    missing_numbers = property(get_missing_numbers)
+
+
+class Column(CellList):
+    _GROUP_BY = 1
+
+
+class Grid(CellList):
+    _GROUP_BY = 3
+
+
+class Row(CellList):
+    _GROUP_BY = 9
+
+
+class BoardCellList(CellList):
+    _FORCE_UNIQUE = False
+    _GROUP_BY = 81
+    _NUMBER_OF_CELLS = 81
+
+    def get_missing_numbers(self):
+        return
+
 
 class Board(object):
-    def __init__(self, gridBase=DEF_GRID_BASE):
-        self.__gridBase = gridBase
-        self.__maxTiles = gridBase ** 2
-        self.__tiles = [Tile() for n in xrange(self.__maxTiles)]
+    def __init__(self, celllists):
+        self._cells = None
+        self._celllists = None
+        self._columns = None
+        self._grids = None
+        self._rows = None
+        self.celllists = celllists
 
-    @property
-    def tiles(self):
-        return self.__tiles
+    def __iter__(self):
+        for celllist in self.celllists:
+            yield celllist
 
-    @property
-    def col(self, col):
-        pass
+    def __getitem__(self, idx):
+        return self.celllist[idx]
 
-    @property
-    def row(self, row):
-        pass
+    def _init_cells(self):
+        self._cells = BoardCellList(
+            [cell for celllist in self.celllists for cell in celllist]
+        )
+
+    def _init_columns(self):
+        self._columns = [
+            Column(
+                [self.celllists[row][column] for row in range(9)]
+            ) for column in range(9)
+        ]
+
+    def _init_grids(self):
+        self._grids = [
+            Grid(
+                [self.celllists[3*(n//3)+m//3][(3*n)%9+m%3] for m in range(9)]
+            ) for n in range(9)
+        ]
+
+    def _init_rows(self):
+        self._rows = [
+            Row(
+                [self.celllists[column][row] for row in range(9)]
+            ) for column in range(9)
+        ]
+
+    @classmethod
+    def from_text(cls, text):
+        return cls([CellList.from_text(text[9*n:9+9*n]) for n in range(9)])
+
+    def get_celllists_at_cell_index(self, idx):
+        if not 0 <= idx <= 81:
+            raise ValueError("invalid cell index: \"{}\"".format(idx))
+
+        return [
+            self.columns[idx%9],
+            self.grids[(idx//27)*3+(idx%9)//3],
+            self.rows[idx//9]
+        ]
+
+    def get_column_at_cell_index(self, idx):
+        return self.get_celllists_at_cell_index(idx)[0]
+
+    def get_grid_at_cell_index(self, idx):
+        return self.get_celllists_at_cell_index(idx)[1]
+
+    def get_row_at_cell_index(self, idx):
+        return self.get_celllists_at_cell_index(idx)[2]
+
+    def get_cells(self):
+        return self._cells
+
+    def get_celllists(self):
+        return self._celllists
+
+    def get_columns(self):
+        return self._columns
+
+    def get_empty_cell_indices(self):
+        return [n for n, cell in enumerate(self.cells) if cell.value == 0]
+
+    def get_grids(self):
+        return self._grids
+
+    def get_rows(self):
+        return self._rows
+
+    def set_celllists(self, celllists):
+        self._celllists = []
+
+        if not isinstance(celllists, (list, tuple)):
+            raise TypeError(
+                "invalid argument type: \"{}\"".format(type(celllists).__name__)
+            )
+        if len(celllists) != 9:
+            raise ValueError("wrong number of cell sets")
+        for celllist in celllists:
+            if not isinstance(celllist, CellList):
+                raise TypeError(
+                    "invalid argument type in cell set list: \"{}\"".format(
+                        type(celllist).__name__
+                    )
+                )
+
+            self._celllists.append(celllist)
+
+        self._init_cells()
+        self._init_columns()
+        self._init_grids()
+        self._init_rows()
+
+    def show(self):
+        sys.stdout.write(str(self))
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.celllists))
 
 
-class Game(object):
-    def __init__(self, gridBase=DEF_GRID_BASE):
-        pass
+    def __str__(self):
+        return "".join([str(celllist) for celllist in self.celllists])
 
-if __name__ == '__main__':
-    os.system('clear')
-    b = Board()
-    print str(b.tiles[0])
+    cells = property(get_cells)
+    celllists = property(get_celllists, set_celllists)
+    columns = property(get_columns)
+    empty_cell_indices = property(get_empty_cell_indices)
+    grids = property(get_grids)
+    rows = property(get_rows)
 
+
+class Sudoku(object):
+    def __init__(self, board=None):
+        self.board = board or self.get_generated_board()
+
+    def get_board(self):
+        return self._board
+
+    def set_board(self, board):
+        if not isinstance(board, Board):
+            raise TypeError("invalid argument type: \"{}\"".format(
+                    board.__class__.__name__
+            ))
+
+        self._board = board
+
+    def show(self):
+        sys.stdout.write(str(self))
+
+    def solve(self):
+        board_then = ""
+        board_now = str(self.board)
+
+        while self.board.empty_cell_indices and board_then != board_now:
+            for idx in self.board.empty_cell_indices:
+                solutions = None
+    
+                for n, celllist in enumerate(
+                    self.board.get_celllists_at_cell_index(idx)
+                ):
+                    if n == 0:
+                        solutions = set(celllist.missing_numbers)
+                    solutions &= set(celllist.missing_numbers)
+    
+                if len(solutions) == 1:
+                    self.board.cells[idx] = Cell(solutions.pop())
+
+            board_then = board_now
+            board_now = str(self.board)
+
+        if self.board.empty_cell_indices:
+            raise Unsolvable("**meh**")
+
+    @staticmethod
+    def get_generated_board():
+        """
+        To be implemented
+        """
+        return Board.from_text(
+            ".5.1968.." +
+            ".8.342956" +
+            ".36857142" +
+            ".6372.514" +
+            "427615389" +
+            "195.8326." +
+            "51297463." +
+            "378261.9." +
+            "..9538.2."
+        )
+
+    def __repr__(self):
+        return "{}({})".format(type(self).__name__, repr(self.board))
+
+    def __str__(self):
+        return "\n{}\n".format("╋".join([
+            "━" * 3 * len(str(self.board.cells[0])) for _ in range(3)
+        ])).join([
+            "\n".join([
+                "┃".join([
+                    "".join([
+                        str(cell) for cell in row[3*m:3+3*m]
+                    ]) for m in range(3)
+                ]) for row in self.board.rows[3*n:3+3*n]
+            ]) for n in range(3)
+        ])
+
+    board = property(get_board, set_board)
+
+
+def main():
+    sudoku = Sudoku(
+        Board.from_text(
+            "..5.6.98." +
+            "7.9.2.6.1" +
+            "42....7.." +
+            "..3.1...." +
+            "..74..3.8" +
+            "1........" +
+            "....7...." +
+            "6..1..89." +
+            ".....3.2."
+        )
+    )
+    try:
+        sudoku.solve()
+    except Unsolvable as exc:
+        print("Unsolvable: \"{}\"! final state:\n{}\n".format(exc, sudoku))
+        return 1
+    except KeyboardInterrupt as exc:
+        print("Interrupted! final state:\n{}\n".format(sudoku))
+        return 1
+
+    print("Solution:\n{}\n".format(sudoku))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
