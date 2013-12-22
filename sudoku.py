@@ -51,7 +51,7 @@ class Cell(object):
     def __repr__(self):
         return self.__str__()
 
-class Tile(object):
+class CellList(object):
     def __init__(self, values=[], gridBase=DEF_GRID_BASE):
         self.__gridBase = gridBase
         self.__maxCells = self.__gridBase ** 2
@@ -71,6 +71,7 @@ class Tile(object):
 
         self.__cells = [Cell(v) for v in values]
 
+class Tile(CellList):
     def __str__(self):
         out = ""
         for y in xrange(self.__gridBase):
@@ -84,10 +85,16 @@ class Tile(object):
     def __repr__(self):
         return self.__str__()
 
+class Row(CellList):
+    pass
+
+class Row(CellList):
+    pass
+
 class Board(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
         self.__gridBase = gridBase
-        self.__maxTiles = gridBase ** 2
+        self.__maxTiles = self.__gridBase ** 2
         self.__tiles = [Tile() for n in xrange(self.__maxTiles)]
 
     @property
@@ -102,14 +109,20 @@ class Board(object):
     def row(self, row):
         pass
 
+    @col.setter
+    def col(self, col):
+        pass
+
+    @row.setter
+    def row(self, row):
+        pass
 
 class Game(object):
     def __init__(self, gridBase=DEF_GRID_BASE):
-        pass
+        self.__board = Board()
 
 if __name__ == '__main__':
     os.system('clear')
     b = Board()
-    for n, t in enumerate(b.tiles):
-        print "[{0}]\n{1}".format(n, repr(t))
+    print repr(b.tiles[0])
 
