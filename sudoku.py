@@ -80,13 +80,8 @@ class CellGroup(object):
         self._maxCells = maxCells
         self._tileBase = tileBase
         self._cells = []
-
-### HIERO
-
         self._options = []
         self._positions = []
-
-### HIERO
 
     @property
     def cells(self):
@@ -98,6 +93,7 @@ class CellGroup(object):
             self.addCell(cell)
 
 # HIERO CONTROLEREN OF VALUE VAN CELL UNIQUE IS
+# (VALUE MOET ONDERDEEL VAN OPTIONS ZIJN)
 
     def addCell(self, cell):
         if self._maxCells <= len(self._cells):
@@ -140,18 +136,8 @@ class Board(object):
         self._rows = []
         self._tiles = []
         self.initCells()
-#        self.initCellGroups()
 
     def initCells(self):
-#        for n in xrange(self._tileBase ** 4):
-#            c = Cell(None)
-#            c.row, c.col = divmod(n, self._tileBase ** 2)
-#            c.tile = (
-#                self._tileBase * (n // self._tileBase ** self._tileBase) +
-#                (n % self._tileBase ** 2) // self._tileBase
-#            )
-#            self._cells.addCell(c)
-
         for n in xrange(self._tileBase ** 4):
             c = Cell(None)
             row_n, col_n = divmod(n, self._tileBase ** 2)
@@ -172,23 +158,6 @@ class Board(object):
             self._tiles[tile_n].addCell(c)
 
             self._cells.addCell(c)
-
-
-#    def initCellGroups(self):
-#        for n in xrange(self._tileBase ** 2):
-#            col = Col()
-#            row = Row()
-#            tile = Tile()
-#            for cell in self._cells.cells:
-#                if cell.col == n:
-#                    col.addCell(cell)
-#                if cell.row == n:
-#                    row.addCell(cell)
-#                if cell.tile == n:
-#                    tile.addCell(cell)
-#            self._cols.append(col)
-#            self._rows.append(row)
-#            self._tiles.append(tile)
 
     @property
     def cell(self, cell):
@@ -241,3 +210,4 @@ class Game(object):
 if __name__ == '__main__':
     os.system('clear')
     b = Board()
+    print(str(b.cols[0]))
