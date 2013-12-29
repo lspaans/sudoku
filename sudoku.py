@@ -173,6 +173,9 @@ class Board(object):
     def __init__(self, valueStr=None, tileBase=DEF_TILE_BASE):
         self._tileBase = tileBase
         self._cells = CellGroup(self._tileBase ** 4)
+        self._col_map = {}
+        self._row_map = {}
+        self._tile_map = {}
         self._cols = []
         self._rows = []
         self._tiles = []
@@ -186,8 +189,13 @@ class Board(object):
             if not valueStr is None and len(valueStr) > 0:
                 value, valueStr = valueStr[0:1:], valueStr[1::]
                 c.value = int(value)
+            self._row_map[n], self._col_map[n] = divmod(n, self._tileBase ** 2)
             c.row_n, c.col_n = divmod(n, self._tileBase ** 2)
             c.tile_n = (
+                self._tileBase * (n // self._tileBase ** self._tileBase) +
+                (n % self._tileBase ** 2) // self._tileBase
+            )
+            self._tile_map[n] = (
                 self._tileBase * (n // self._tileBase ** self._tileBase) +
                 (n % self._tileBase ** 2) // self._tileBase
             )
