@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 
 DEF_TILE_BASE = 3
 
@@ -29,12 +30,24 @@ class Cell(object):
         return self._col
 
     @property
+    def col_n(self):
+        return self._col_n
+
+    @property
     def row(self):
         return self._row
 
     @property
+    def row_n(self):
+        return self._row_n
+
+    @property
     def tile(self):
         return self._tile
+
+    @property
+    def tile_n(self):
+        return self._tile_n
 
     @maxValue.setter
     def maxValue(self, maxValue):
@@ -59,21 +72,42 @@ class Cell(object):
 
     @col.setter
     def col(self, col):
-        self._col = col
+        if isinstance(type(col), type(Col)):
+            self._col = col
+        else:
+            raise ValueError("Non Col()-class ({0})".format(type(col)))
+
+    @col_n.setter
+    def col_n(self, col_n):
+        self._col_n = col_n
 
     @row.setter
     def row(self, row):
-        self._row = row
+        if isinstance(type(row), type(Row)):
+            self._row = row
+        else:
+            raise ValueError("Non Row()-class ({0})".format(type(row)))
+
+    @row_n.setter
+    def row_n(self, row_n):
+        self._row_n = row_n
 
     @tile.setter
     def tile(self, tile):
-        self._tile = tile
+        if isinstance(type(tile), type(Tile)):
+            self._tile = tile
+        else:
+            raise ValueError("Non Tile()-class ({0})".format(type(tile)))
+
+    @tile_n.setter
+    def tile_n(self, tile_n):
+        self._tile_n = tile_n
 
     def __str__(self):
         if self._value is None:
-            return " "
+            return "[ ]"
         else:
-            return str(self._value)
+            return "[{0}]".format(self._value)
 
     def __repr__(self):
         return self.__str__()
@@ -109,14 +143,14 @@ class CellGroup(object):
 
 class Col(CellGroup):
     def __str__(self):
-        return "[{0}]".format("]\n[".join(map(lambda c: str(c), self.cells)))
+        return "\n".join(map(lambda c: str(c), self.cells))
 
     def __repr__(self):
         return self.__str__()
 
 class Row(CellGroup):
     def __str__(self):
-        return "[{0}]".format("] [".join(map(lambda c: str(c), self.cells)))
+        return " ".join(map(lambda c: str(c), self.cells))
 
     def __repr__(self):
         return self.__str__()
@@ -127,8 +161,8 @@ class Tile(CellGroup):
         for y in xrange(self._tileBase):
             s = y * self._tileBase
             e = s + self._tileBase
-            out += "[{0}]\n".format(
-                "] [".join(map(lambda c: str(c), self.cells[s:e]))
+            out += "{0}\n".format(
+                " ".join(map(lambda c: str(c), self.cells[s:e]))
             )
         return out
 
@@ -144,6 +178,7 @@ class Board(object):
         self._tiles = []
         self.initCells(valueStr)
         self.initCellGroups()
+        self.updateCells()
 
     def initCells(self, valueStr=None):
         for n in xrange(self._tileBase ** 4):
@@ -151,28 +186,35 @@ class Board(object):
             if not valueStr is None and len(valueStr) > 0:
                 value, valueStr = valueStr[0:1:], valueStr[1::]
                 c.value = int(value)
-            c.row, c.col = divmod(n, self._tileBase ** 2)
-            c.tile = (
+            c.row_n, c.col_n = divmod(n, self._tileBase ** 2)
+            c.tile_n = (
                 self._tileBase * (n // self._tileBase ** self._tileBase) +
                 (n % self._tileBase ** 2) // self._tileBase
             )
-            self._cells.addCell(c)
+            self.cells.addCell(c)
 
     def initCellGroups(self):
         for n in xrange(self._tileBase ** 2):
             col = Col()
             row = Row()
             tile = Tile()
-            for cell in self._cells.cells:
-                if cell.col == n:
-                    col.addCell(cell)
-                if cell.row == n:
-                    row.addCell(cell)
-                if cell.tile == n:
-                    tile.addCell(cell)
-            self._cols.append(col)
-            self._rows.append(row)
-            self._tiles.append(tile)
+            for c in self._cells.cells:
+                if c.col_n == n:
+                    col.addCell(c)
+                if c.row_n == n:
+                    row.addCell(c)
+                if c.tile_n == n:
+                    tile.addCell(c)
+            self.cols.append(col)
+            self.rows.append(row)
+            self.tiles.append(tile)
+
+    def updateCells(self):
+        for n in xrange(self._tileBase ** 4):
+            c = self.cells.cells[n]
+            c.col = self.cols[c.col_n]
+            c.row = self.rows[c.row_n]
+            c.tile = self.tiles[c.tile_n]
 
     @property
     def cell(self, cell):
@@ -234,3 +276,10 @@ if __name__ == '__main__':
     os.system('clear')
     b = Board(boards[1])
     print(str(b))
+    print("")
+    print(str(b.cells.cells[0].col))
+    print("")
+    print(str(b.cells.cells[0].row))
+    print("")
+    print(str(b.cells.cells[0].tile))
+    sys.exit(0)
