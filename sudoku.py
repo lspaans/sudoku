@@ -55,7 +55,7 @@ class Cell(object):
             self._value = None 
             self.options = self.allOptions
         else:
-            raise ValueError("Invalid value ({0}/{1})".format(value, repr(self.options)))
+            raise ValueError("Invalid value ({0})".format(value))
 
     @col.setter
     def col(self, col):
@@ -136,18 +136,21 @@ class Tile(CellGroup):
         return self.__str__()
 
 class Board(object):
-    def __init__(self, tileBase=DEF_TILE_BASE):
+    def __init__(self, valueStr=None, tileBase=DEF_TILE_BASE):
         self._tileBase = tileBase
         self._cells = CellGroup(self._tileBase ** 4)
         self._cols = []
         self._rows = []
         self._tiles = []
-        self.initCells()
+        self.initCells(valueStr)
         self.initCellGroups()
 
-    def initCells(self):
+    def initCells(self, valueStr=None):
         for n in xrange(self._tileBase ** 4):
             c = Cell(None)
+            if not valueStr is None and len(valueStr) > 0:
+                value, valueStr = valueStr[0:1:], valueStr[1::]
+                c.value = int(value)
             c.row, c.col = divmod(n, self._tileBase ** 2)
             c.tile = (
                 self._tileBase * (n // self._tileBase ** self._tileBase) +
@@ -229,15 +232,5 @@ if __name__ == '__main__':
             "7000500100020780005001000006040000030200"
     ]
     os.system('clear')
-    b = Board()
+    b = Board(boards[1])
     print(str(b))
-    for n, char in enumerate(boards[1]):
-        b.cells._cells[n].value = int(char)
-    print
-    print(str(b))
-    print
-    print(str(b.cols[0]))
-    print
-    print(str(b.rows[0]))
-    print
-    print(str(b.tiles[0]))
