@@ -30,24 +30,12 @@ class Cell(object):
         return self._col
 
     @property
-    def col_n(self):
-        return self._col_n
-
-    @property
     def row(self):
         return self._row
 
     @property
-    def row_n(self):
-        return self._row_n
-
-    @property
     def tile(self):
         return self._tile
-
-    @property
-    def tile_n(self):
-        return self._tile_n
 
     @maxValue.setter
     def maxValue(self, maxValue):
@@ -77,10 +65,6 @@ class Cell(object):
         else:
             raise ValueError("Non Col()-class ({0})".format(type(col)))
 
-    @col_n.setter
-    def col_n(self, col_n):
-        self._col_n = col_n
-
     @row.setter
     def row(self, row):
         if isinstance(type(row), type(Row)):
@@ -88,20 +72,12 @@ class Cell(object):
         else:
             raise ValueError("Non Row()-class ({0})".format(type(row)))
 
-    @row_n.setter
-    def row_n(self, row_n):
-        self._row_n = row_n
-
     @tile.setter
     def tile(self, tile):
         if isinstance(type(tile), type(Tile)):
             self._tile = tile
         else:
             raise ValueError("Non Tile()-class ({0})".format(type(tile)))
-
-    @tile_n.setter
-    def tile_n(self, tile_n):
-        self._tile_n = tile_n
 
     def __str__(self):
         if self._value is None:
@@ -190,11 +166,6 @@ class Board(object):
                 value, valueStr = valueStr[0:1:], valueStr[1::]
                 c.value = int(value)
             self._row_map[n], self._col_map[n] = divmod(n, self._tileBase ** 2)
-            c.row_n, c.col_n = divmod(n, self._tileBase ** 2)
-            c.tile_n = (
-                self._tileBase * (n // self._tileBase ** self._tileBase) +
-                (n % self._tileBase ** 2) // self._tileBase
-            )
             self._tile_map[n] = (
                 self._tileBase * (n // self._tileBase ** self._tileBase) +
                 (n % self._tileBase ** 2) // self._tileBase
@@ -206,13 +177,18 @@ class Board(object):
             col = Col()
             row = Row()
             tile = Tile()
-            for c in self._cells.cells:
-                if c.col_n == n:
-                    col.addCell(c)
-                if c.row_n == n:
-                    row.addCell(c)
-                if c.tile_n == n:
-                    tile.addCell(c)
+            for m in filter(
+                lambda m: self._col_map[m] == n, self._col_map.keys()
+            ):
+                col.addCell(self._cells.cells[m])
+            for m in filter(
+                lambda m: self._row_map[m] == n, self._row_map.keys()
+            ):
+                row.addCell(self._cells.cells[m])
+            for m in filter(
+               lambda m: self._tile_map[m] == n, self._tile_map.keys()
+            ):
+                tile.addCell(self._cells.cells[m])
             self.cols.append(col)
             self.rows.append(row)
             self.tiles.append(tile)
@@ -220,9 +196,9 @@ class Board(object):
     def updateCells(self):
         for n in xrange(self._tileBase ** 4):
             c = self.cells.cells[n]
-            c.col = self.cols[c.col_n]
-            c.row = self.rows[c.row_n]
-            c.tile = self.tiles[c.tile_n]
+            c.col = self.cols[self._col_map[n]]
+            c.row = self.rows[self._row_map[n]]
+            c.tile = self.tiles[self._tile_map[n]]
 
     @property
     def cell(self, cell):
