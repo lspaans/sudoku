@@ -148,10 +148,7 @@ class Tile(CellGroup):
 class Board(object):
     def __init__(self, valueStr=None, tileBase=DEF_TILE_BASE):
         self._tileBase = tileBase
-        self._cells = CellGroup(self._tileBase ** 4)
-        self._col_map = {}
-        self._row_map = {}
-        self._tile_map = {}
+        self._cellGroup = CellGroup(self._tileBase ** 4)
         self._cols = []
         self._rows = []
         self._tiles = []
@@ -159,56 +156,58 @@ class Board(object):
         self.initCellGroups()
         self.updateCells()
 
+    def _getCol(self, cell):
+        return cell % self._tileBase ** 2
+
+    def _getRow(self, cell):
+        return cell // self._tileBase ** 2
+
+    def _getTile(self, cell):
+        return (
+            self._tileBase * (cell // self._tileBase ** 3) +
+            (cell % self._tileBase ** 2) // self._tileBase
+        )
+
     def initCells(self, valueStr=None):
         for n in xrange(self._tileBase ** 4):
             c = Cell(None)
             if not valueStr is None and len(valueStr) > 0:
                 value, valueStr = valueStr[0:1:], valueStr[1::]
                 c.value = int(value)
-            self._row_map[n], self._col_map[n] = divmod(n, self._tileBase ** 2)
-            self._tile_map[n] = (
-                self._tileBase * (n // self._tileBase ** self._tileBase) +
-                (n % self._tileBase ** 2) // self._tileBase
-            )
-            self.cells.addCell(c)
+            self.cellGroup.addCell(c)
 
     def initCellGroups(self):
         for n in xrange(self._tileBase ** 2):
             col = Col()
             row = Row()
             tile = Tile()
-            for m in filter(
-                lambda m: self._col_map[m] == n, self._col_map.keys()
-            ):
-                col.addCell(self._cells.cells[m])
-            for m in filter(
-                lambda m: self._row_map[m] == n, self._row_map.keys()
-            ):
-                row.addCell(self._cells.cells[m])
-            for m in filter(
-               lambda m: self._tile_map[m] == n, self._tile_map.keys()
-            ):
-                tile.addCell(self._cells.cells[m])
+            for m in xrange(self._tileBase ** 4):
+                if self._getCol(m) == n:
+                    col.addCell(self.cellGroup.cells[m])
+                if self._getRow(m) == n:
+                    row.addCell(self.cellGroup.cells[m])
+                if self._getTile(m) == n:
+                    tile.addCell(self.cellGroup.cells[m])
             self.cols.append(col)
             self.rows.append(row)
             self.tiles.append(tile)
 
     def updateCells(self):
         for n in xrange(self._tileBase ** 4):
-            c = self.cells.cells[n]
-            c.col = self.cols[self._col_map[n]]
-            c.row = self.rows[self._row_map[n]]
-            c.tile = self.tiles[self._tile_map[n]]
+            c = self.cellGroup.cells[n]
+            c.col = self.cols[self._getCol(n)]
+            c.row = self.rows[self._getRow(n)]
+            c.tile = self.tiles[self._getTile(n)]
 
     @property
     def cell(self, cell):
         if cell >= len(self._cells):
             raise ValueError("Invalid cell")
-        return self._cells[cell]
+        return self.cellGroup[cell]
 
     @property
-    def cells(self):
-        return self._cells
+    def cellGroup(self):
+        return self._cellGroup
 
     def col(self, col):
         if col >= self._tileBase ** 2:
@@ -261,9 +260,9 @@ if __name__ == '__main__':
     b = Board(boards[1])
     print(str(b))
     print("")
-    print(str(b.cells.cells[0].col))
+    print(str(b.cellGroup.cells[0].col))
     print("")
-    print(str(b.cells.cells[0].row))
+    print(str(b.cellGroup.cells[0].row))
     print("")
-    print(str(b.cells.cells[0].tile))
+    print(str(b.cellGroup.cells[0].tile))
     sys.exit(0)
