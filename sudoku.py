@@ -3,11 +3,16 @@
 import os
 import sys
 
+from math import log10
+
 DEF_TILE_BASE = 3
 
 class Cell(object):
     def __init__(self, value=None, tileBase=DEF_TILE_BASE, options=[]):
         self._tileBase = tileBase
+        self._col = None
+        self._row = None
+        self._tile = None
         self.maxValue = self._tileBase ** 2
         self.allOptions = range(1, self.maxValue + 1)
         self.options = self.allOptions
@@ -23,7 +28,10 @@ class Cell(object):
 
     @property
     def value(self):
-        return self._value
+        if self._value is None or self._value == 0:
+            return " "
+        else:
+            return self._value
 
     @property
     def col(self):
@@ -57,6 +65,7 @@ class Cell(object):
             self.options = self.allOptions
         else:
             raise ValueError("Invalid value ({0})".format(value))
+        self._update()
 
     @col.setter
     def col(self, col):
@@ -79,11 +88,18 @@ class Cell(object):
         else:
             raise ValueError("Non Tile()-class ({0})".format(type(tile)))
 
+    def _update(self):
+        if not self.col is None:
+            self.col.update()
+        if not self.row is None:
+            self.row.update()
+        if not self.tile is None:
+            self.tile.update()
+
     def __str__(self):
-        if self._value is None:
-            return "[ ]"
-        else:
-            return "[{0}]".format(self._value)
+        return (
+            "[{0:" + str(int(1+log10(self.maxValue))) + "}]"
+        ).format(self.value)
 
     def __repr__(self):
         return self.__str__()
@@ -116,6 +132,10 @@ class CellGroup(object):
         if self._maxCells <= len(self._cells):
             raise ValueError("Too many cells")
         self._cells.append(cell)
+
+    def update(self):
+# HIERO
+        print("CellGroup() updated")
 
 class Col(CellGroup):
     def __str__(self):
@@ -152,9 +172,9 @@ class Board(object):
         self._cols = []
         self._rows = []
         self._tiles = []
-        self.initCells(valueStr)
-        self.initCellGroups()
-        self.updateCells()
+        self._initCells(valueStr)
+        self._initCellGroups()
+        self._updateCells()
 
     def _getCol(self, cell):
         return cell % self._tileBase ** 2
@@ -168,19 +188,19 @@ class Board(object):
             (cell % self._tileBase ** 2) // self._tileBase
         )
 
-    def initCells(self, valueStr=None):
+    def _initCells(self, valueStr=None):
         for n in xrange(self._tileBase ** 4):
-            c = Cell(None)
+            c = Cell(None, self._tileBase)
             if not valueStr is None and len(valueStr) > 0:
                 value, valueStr = valueStr[0:1:], valueStr[1::]
                 c.value = int(value)
             self.cellGroup.addCell(c)
 
-    def initCellGroups(self):
+    def _initCellGroups(self):
         for n in xrange(self._tileBase ** 2):
-            col = Col()
-            row = Row()
-            tile = Tile()
+            col = Col(self._tileBase ** 2, self._tileBase)
+            row = Row(self._tileBase ** 2, self._tileBase)
+            tile = Tile(self._tileBase ** 2, self._tileBase)
             for m in xrange(self._tileBase ** 4):
                 if self._getCol(m) == n:
                     col.addCell(self.cellGroup.cells[m])
@@ -192,12 +212,15 @@ class Board(object):
             self.rows.append(row)
             self.tiles.append(tile)
 
-    def updateCells(self):
+    def _updateCells(self):
         for n in xrange(self._tileBase ** 4):
-            c = self.cellGroup.cells[n]
-            c.col = self.cols[self._getCol(n)]
-            c.row = self.rows[self._getRow(n)]
-            c.tile = self.tiles[self._getTile(n)]
+#            c = self.cellGroup.cells[n]
+#            c.col = self.cols[self._getCol(n)]
+#            c.row = self.rows[self._getRow(n)]
+#            c.tile = self.tiles[self._getTile(n)]
+            self.cellGroup.cells[n].col = self.cols[self._getCol(n)]
+            self.cellGroup.cells[n].row = self.rows[self._getRow(n)]
+            self.cellGroup.cells[n].tile = self.tiles[self._getTile(n)]
 
     @property
     def cell(self, cell):
@@ -265,4 +288,5 @@ if __name__ == '__main__':
     print(str(b.cellGroup.cells[0].row))
     print("")
     print(str(b.cellGroup.cells[0].tile))
+    b.cellGroup.cells[1].value = 2
     sys.exit(0)
