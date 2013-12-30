@@ -202,25 +202,23 @@ class Board(object):
             row = Row(self._tileBase ** 2, self._tileBase)
             tile = Tile(self._tileBase ** 2, self._tileBase)
             for m in xrange(self._tileBase ** 4):
+                c = self.cellGroup.cells[m]
                 if self._getCol(m) == n:
-                    col.addCell(self.cellGroup.cells[m])
+                    col.addCell(c)
                 if self._getRow(m) == n:
-                    row.addCell(self.cellGroup.cells[m])
+                    row.addCell(c)
                 if self._getTile(m) == n:
-                    tile.addCell(self.cellGroup.cells[m])
+                    tile.addCell(c)
             self.cols.append(col)
             self.rows.append(row)
             self.tiles.append(tile)
 
     def _updateCells(self):
         for n in xrange(self._tileBase ** 4):
-#            c = self.cellGroup.cells[n]
-#            c.col = self.cols[self._getCol(n)]
-#            c.row = self.rows[self._getRow(n)]
-#            c.tile = self.tiles[self._getTile(n)]
-            self.cellGroup.cells[n].col = self.cols[self._getCol(n)]
-            self.cellGroup.cells[n].row = self.rows[self._getRow(n)]
-            self.cellGroup.cells[n].tile = self.tiles[self._getTile(n)]
+            c = self.cellGroup.cells[n]
+            c.col = self.cols[self._getCol(n)]
+            c.row = self.rows[self._getRow(n)]
+            c.tile = self.tiles[self._getTile(n)]
 
     @property
     def cell(self, cell):
