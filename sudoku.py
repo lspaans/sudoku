@@ -33,18 +33,6 @@ class Cell(object):
         else:
             return self._value
 
-    @property
-    def col(self):
-        return self._col
-
-    @property
-    def row(self):
-        return self._row
-
-    @property
-    def tile(self):
-        return self._tile
-
     @maxValue.setter
     def maxValue(self, maxValue):
         self._maxValue = maxValue
@@ -65,36 +53,6 @@ class Cell(object):
             self.options = self.allOptions
         else:
             raise ValueError("Invalid value ({0})".format(value))
-        self._update()
-
-    @col.setter
-    def col(self, col):
-        if isinstance(type(col), type(Col)):
-            self._col = col
-        else:
-            raise ValueError("Non Col()-class ({0})".format(type(col)))
-
-    @row.setter
-    def row(self, row):
-        if isinstance(type(row), type(Row)):
-            self._row = row
-        else:
-            raise ValueError("Non Row()-class ({0})".format(type(row)))
-
-    @tile.setter
-    def tile(self, tile):
-        if isinstance(type(tile), type(Tile)):
-            self._tile = tile
-        else:
-            raise ValueError("Non Tile()-class ({0})".format(type(tile)))
-
-    def _update(self):
-        if not self.col is None:
-            self.col.update()
-        if not self.row is None:
-            self.row.update()
-        if not self.tile is None:
-            self.tile.update()
 
     def __str__(self):
         return (
@@ -134,7 +92,7 @@ class CellGroup(object):
         self._cells.append(cell)
 
     def update(self):
-# HIERO
+# HIERO -> Dit moet worden geimplementeerd
         print("CellGroup() updated")
 
 class Col(CellGroup):
@@ -174,7 +132,6 @@ class Board(object):
         self._tiles = []
         self._initCells(values)
         self._initCellGroups()
-        self._updateCells()
 
     def _initCells(self, values=None):
         for n in xrange(self._tileBase ** 4):
@@ -198,13 +155,6 @@ class Board(object):
             self.cols.append(col)
             self.rows.append(row)
             self.tiles.append(tile)
-
-    def _updateCells(self):
-        for n in xrange(self._tileBase ** 4):
-            c = self.cellGroup.cells[n]
-            c.col = self.cols[self._getCellColNumber(n)]
-            c.row = self.rows[self._getCellRowNumber(n)]
-            c.tile = self.tiles[self._getCellTileNumber(n)]
 
     def getCellCol(self, cell):
         return self.cols[self._getCellColNumber(cell)]
@@ -244,6 +194,13 @@ class Board(object):
             lambda c: self._getCellTileNumber(c) == tile,
             xrange(self._tileBase ** 4)
         )
+
+    def setCellValue(self, cell, value):
+        self.cells[cell].value = value
+# HIERO: Hier moeten de CellGroups geupdatet worden
+        self.cols[self._getCellColNumber(cell)].update()
+        self.rows[self._getCellRowNumber(cell)].update()
+        self.tiles[self._getCellTileNumber(cell)].update()
 
     @property
     def cell(self, cell):
@@ -339,7 +296,8 @@ if __name__ == '__main__':
     print
     print(b.getCellRow(1))
     print
-    b.cells[1].value = 2
+# Dit moet vervangen worden door een Board()-method
+    b.setCellValue(1,2)
     print
     print(b.getCellRow(1))
     sys.exit(0)
