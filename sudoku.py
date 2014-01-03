@@ -206,11 +206,20 @@ class Board(object):
             c.row = self.rows[self._getCellRowNumber(n)]
             c.tile = self.tiles[self._getCellTileNumber(n)]
 
+    def getCellCol(self, cell):
+        return self.cols[self._getCellColNumber(cell)]
+
     def _getCellColNumber(self, cell):
         return cell % self._tileBase ** 2
 
+    def getCellRow(self, cell):
+        return self.rows[self._getCellRowNumber(cell)]
+
     def _getCellRowNumber(self, cell):
         return cell // self._tileBase ** 2
+
+    def getCellTile(self, cell):
+        return self.tiles[self._getCellTileNumber(cell)]
 
     def _getCellTileNumber(self, cell):
         return (
@@ -245,6 +254,10 @@ class Board(object):
     @property
     def cellGroup(self):
         return self._cellGroup
+
+    @property
+    def cells(self):
+        return self.cellGroup.cells
 
     def col(self, col):
         if col >= self._tileBase ** 2:
@@ -286,21 +299,47 @@ class Game(object):
 
 if __name__ == '__main__':
     boards = [
-        "02900170080000030600700000410000500060002" + 
-            "3009900008000004000003500000402013002500",
-        "10000276020000100803600700400006087260702" + 
-            "9000000000000080070300013000500000010097",
-        "00004070000000105084000200310050003060900" + 
-            "7000500100020780005001000006040000030200"
+        "029001700" +
+        "800000306" +
+        "007000004" + 
+        "100005000" + 
+        "600023009" +
+        "900008000" + 
+        "004000003" +
+        "500000402" +
+        "013002500",
+
+        "100002760" + 
+        "200001008" + 
+        "036007004" + 
+        "000060872" + 
+        "607029000" + 
+        "000000000" + 
+        "080070300" + 
+        "013000500" + 
+        "000010097",
+
+        "000040700" + 
+        "000001050" + 
+        "840002003" + 
+        "100500030" +
+        "609007000" +
+        "500100020" +
+        "780005001" +
+        "000006040" +
+        "000030200"
     ]
     os.system('clear')
     b = Board(boards[1])
-    print(str(b))
-    print("")
-    print(str(b.cellGroup.cells[0].col))
-    print("")
-    print(str(b.cellGroup.cells[9].row))
-    print("")
-    print(str(b.cellGroup.cells[27].tile))
-    b.cellGroup.cells[1].value = 2
+    print(b)
+    print
+    print(b.getCellCol(9))
+    print
+    print(b.getCellTile(27))
+    print
+    print(b.getCellRow(1))
+    print
+    b.cells[1].value = 2
+    print
+    print(b.getCellRow(1))
     sys.exit(0)
