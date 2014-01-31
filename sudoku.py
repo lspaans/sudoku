@@ -7,6 +7,59 @@ from math import log10
 
 DEF_TILE_BASE = 3
 
+class MultiKeySet(object):
+    def __init__(self, key=(), value=()):
+        self.key = set(key)
+        self.value = set(value)
+
+    def key(self):
+        return self.key
+
+    def value(self):
+        return self.value
+
+    def __str__(self):
+        return "({0}) = ({1})".format(
+            ", ".join(map(lambda s: str(s),self.key)),
+            ", ".join(map(lambda s: str(s),self.value))
+        )
+
+    def __repr__(self):
+        return self.__str__()
+
+class MultiKeyMatrix(object):
+    def __init__(self, mks=MultiKeySet()):
+        self.value = [mks]
+
+    def add(self, mks=MultiKeySet()):
+        for m in self.value:
+            if m.value  == mks.value:
+                m.key.update(mks.key)
+                break
+            elif m.value.issubset(mks.value):
+                if len(m.key) == len(m.value):
+                    self.value.append(
+                        MultiKeySet(mks.key, mks.value - m.value)
+                    )
+                else:
+                    self.value.append(mks)
+                break
+        self.sort()
+
+    def sort(self):
+        self.value = sorted(
+            self.value, reverse=True, key=lambda m: len(m.value)
+        )
+
+    def __str__(self):
+        out = ""
+        for m in self.value:
+            out = "{0}\n{1}".format(out, repr(m))
+        return out 
+
+    def __repr__(self):
+        return self.__str__()
+
 class Cell(object):
     def __init__(self, value=None, tileBase=DEF_TILE_BASE, options=[]):
         self._tileBase = tileBase
@@ -300,4 +353,17 @@ if __name__ == '__main__':
     b.setCellValue(1,2)
     print
     print(b.getCellRow(1))
+
+    print
+
+    mks1 = MultiKeySet((1,2,3,1), (0,2,4,2))
+    mks2 = MultiKeySet((6,), (0,2,4,2,3))
+    mks3 = MultiKeySet((9,), (0,2,4,2))
+    
+    mkm = MultiKeyMatrix(mks1)
+    mkm.add(mks2)
+    mkm.add(mks3)
+
+    print(mkm)
+
     sys.exit(0)
