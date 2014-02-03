@@ -15,6 +15,9 @@ class MultiKeySet(object):
     def key(self):
         return self.key
 
+    def appendKey(self, key):
+        self.key.update(key)
+
     def value(self):
         return self.value
 
@@ -34,7 +37,7 @@ class MultiKeyMatrix(object):
     def add(self, mks=MultiKeySet()):
         for m in self.value:
             if m.value  == mks.value:
-                m.key.update(mks.key)
+                m.appendKey(mks.key)
                 break
             elif m.value.issubset(mks.value):
                 if len(m.key) == len(m.value):
@@ -44,6 +47,8 @@ class MultiKeyMatrix(object):
                 else:
                     self.value.append(mks)
                 break
+        else:
+            self.value.append(mks)
         self.sort()
 
     def sort(self):
@@ -359,11 +364,11 @@ if __name__ == '__main__':
     mks1 = MultiKeySet((1,2,3,1), (0,2,4,2))
     mks2 = MultiKeySet((6,), (0,2,4,2,3))
     mks3 = MultiKeySet((9,), (0,2,4,2))
-    
+    mks4 = MultiKeySet((4,5), (7,8))
+        
     mkm = MultiKeyMatrix(mks1)
     mkm.add(mks2)
     mkm.add(mks3)
-
+    mkm.add(mks4)
+    
     print(mkm)
-
-    sys.exit(0)
