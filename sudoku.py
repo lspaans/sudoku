@@ -8,57 +8,59 @@ from math import log10
 DEF_TILE_BASE = 3
 
 class MultiKeySet(object):
-    def __init__(self, key=(), value=()):
-        self.key = set(key)
-        self.value = set(value)
+    def __init__(self, keys=(), values=()):
+        self.keys = set(keys)
+        self.values = set(values)
 
-    def key(self):
-        return self.key
+    def keys(self):
+        return self.keys
 
-    def appendKey(self, key):
-        self.key.update(key)
+    def appendKeys(self, keys):
+        self.key.update(keys)
 
-    def value(self):
-        return self.value
+    def values(self):
+        return self.values
 
     def __str__(self):
         return "({0}) = ({1})".format(
-            ", ".join(map(lambda s: str(s),self.key)),
-            ", ".join(map(lambda s: str(s),self.value))
+            ", ".join(map(lambda s: str(s),self.keys)),
+            ", ".join(map(lambda s: str(s),self.values))
         )
 
     def __repr__(self):
         return self.__str__()
 
 class MultiKeyMatrix(object):
-    def __init__(self, mks=MultiKeySet()):
-        self.value = [mks]
+    def __init__(self, keys=(), values=()):
+        self.values = []
+        if len(keys) > 0 and len(values) > 0:
+            self.values.append(MultiKeySet(keys, values))
 
-    def add(self, mks=MultiKeySet()):
-        for m in self.value:
-            if m.value  == mks.value:
-                m.appendKey(mks.key)
+    def add(self, keys, values=()):
+        for m in self.values:
+            if m.values == values:
+                m.appendKeys(keys)
                 break
-            elif m.value.issubset(mks.value):
-                if len(m.key) == len(m.value):
-                    self.value.append(
-                        MultiKeySet(mks.key, mks.value - m.value)
+            elif m.values.issubset(values):
+                if len(m.keys) == len(m.values):
+                    self.values.append(
+                        MultiKeySet(keys, set(values) - m.values)
                     )
                 else:
-                    self.value.append(mks)
+                    self.values.append(MultiKeySet(keys, values))
                 break
         else:
-            self.value.append(mks)
+            self.values.append(MultiKeySet(keys, values))
         self.sort()
 
     def sort(self):
-        self.value = sorted(
-            self.value, reverse=True, key=lambda m: len(m.value)
+        self.values = sorted(
+            self.values, reverse=True, key=lambda m: len(m.values)
         )
 
     def __str__(self):
         out = ""
-        for m in self.value:
+        for m in self.values:
             out = "{0}\n{1}".format(out, repr(m))
         return out 
 
@@ -361,14 +363,9 @@ if __name__ == '__main__':
 
     print
 
-    mks1 = MultiKeySet((1,2,3,1), (0,2,4,2))
-    mks2 = MultiKeySet((6,), (0,2,4,2,3))
-    mks3 = MultiKeySet((9,), (0,2,4,2))
-    mks4 = MultiKeySet((4,5), (7,8))
+    mkm = MultiKeyMatrix((1,2,3,1), (0,2,4,2))
+    mkm.add((6,), (0,2,4,2,3))
+    mkm.add((9,), (0,2,4,2))
+    mkm.add((4,5), (7,8))
         
-    mkm = MultiKeyMatrix(mks1)
-    mkm.add(mks2)
-    mkm.add(mks3)
-    mkm.add(mks4)
-    
     print(mkm)
