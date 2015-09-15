@@ -14,6 +14,7 @@ SUDOKU_EXAMPLE = """
     7..68....
     .28......
 """
+SUDOKU_BASE    = 9
 
 class Game(object):
     def __init__(self, *args, **kwargs):
@@ -30,39 +31,50 @@ class Game(object):
             self._do_turn()
 
 class Sudoku(Game):
-    def __init__(self, grid=SUDOKU_EXAMPLE, *args, **kwargs):
+    def __init__(
+        self, base=SUDOKU_BASE, grid=SUDOKU_EXAMPLE, *args, **kwargs
+    ):
         super(Sudoku, self).__init__(*args, **kwargs)
+        self._base = base
         self._init_grid(grid)
 
     def _do_turn(self):
         super(Sudoku, self)._do_turn()
+        print('{0}\n'.format(self))
 
     def _init_grid(self, grid):
-        self._columns = map(lambda n: [], xrange(9))
-        self._rows    = map(lambda n: [], xrange(9))
-        self._boxes   = map(lambda n: [], xrange(9))
+        self._grid    = []
+        self._columns = map(lambda n: [], xrange(self._base))
+        self._rows    = map(lambda n: [], xrange(self._base))
+        self._boxes   = map(lambda n: [], xrange(self._base))
         for n, value in enumerate(
             filter(lambda v: re.match(r'[\d\.]', v), grid)
         ):
             cell = Cell(value)
-            self._columns[n%9].append(cell)
-            self._rows[n/9].append(cell)
-            self._boxes[3*((n/9)/3) + (n%9)/3].append(cell)
+            self._grid.append(cell)
+            self._columns[n%self._base].append(cell)
+            self._rows[n/self._base].append(cell)
+            self._boxes[
+                int(self._base**0.5)*((n/self._base)/int(self._base**0.5)) +
+                (n%self._base)/int(self._base**0.5)
+            ].append(cell)
 
     def __str__(self):
         return('\n'.join(map(lambda n: ''.join(
-            map(lambda cell: str(cell), self._rows[n])), xrange(9))
+            map(lambda cell: str(cell), self._rows[n])), xrange(self._base))
         ))
 
 
 class Cell(object):
-    def __init__(self, value):
+    def __init__(self, value, min=1, max=SUDOKU_BASE):
+        self._min = min
+        self._max = max
         self.set_value(value)
 
     def _valid_value(self, value):
         return(value is None or (
             value.isdigit() and
-            1 <= int(value) <= 9
+            self._min <= int(value) <= self._max
         ))
 
     def get_value(self):
@@ -75,8 +87,9 @@ class Cell(object):
             self._value = value
         else:
             raise(ValueError(
-                'Value is not a digit [1..9]: "{0}"'.format(value)
-            ))
+                'Value is not a digit [{0}..{1}]: "{2}"'.format(
+                    self._min, self._max, value
+            )))
 
     def __str__(self):
         value = self.get_value()
@@ -85,9 +98,7 @@ class Cell(object):
         return('[{0}]'.format(value))
 
 def main():
-    sudoku = Sudoku()
-    print(sudoku)
-    sudoku.start()
+    Sudoku().start()
 
 if __name__ == '__main__':
     main()
