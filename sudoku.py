@@ -4,27 +4,16 @@ import math
 import random
 import re
 
-#SUDOKU_EXAMPLE = """
-#    ......68.
-#    ....73..9
-#    3.9....45
-#    49.......
-#    8.3.5.9.2
-#    .......36
-#    96....3.8
-#    7..68....
-#    .28......
-#"""
 SUDOKU_EXAMPLE = """
-    1.89432..
-    ..32...7.
-    .6......3
-    7.9....5.
-    .3....7..
-    .5.7..8.4
-    .8...7..6
-    .975.6481
-    5..4.....
+    ......68.
+    ....73..9
+    3.9....45
+    49.......
+    8.3.5.9.2
+    .......36
+    96....3.8
+    7..68....
+    .28......
 """
 SUDOKU_BASE    = 9
 
@@ -65,32 +54,32 @@ class Sudoku(Game):
             self._finished = True
 
     def _find_cell_positions_for_values(self):
-#        for n in xrange(len(self._boxes)):
-#            free_values = set(xrange(1, self._base+1)) - self._get_box_values(n)
-#            for pos in self._get_free_box_positions(n):
-#                possible_values = self._get_possible_box_cell_values(n, pos)
-#                values = free_values.intersection(possible_values)
-#                if len(values) == 1:
-#                    print((
-#                            'box={0}, pos=({1}), free_values=({2}), ' + 
-#                            'possible_values=({3}), values=({4})'
-#                        ).format(n, pos, free_values, possible_values, values)
-#                    )
-#                    value = values.pop()
-#                    self._boxes[n][pos].set_value(str(value))
-#                    free_values.remove(value)
-#                    self._do_display()
+        for n in xrange(len(self._boxes)):
+            free_values = set(xrange(1, self._base+1)) - self._get_box_values(n)
+            for pos in self._get_free_box_positions(n):
+                possible_values = self._get_possible_box_cell_values(n, pos)
+                values = free_values.intersection(possible_values)
+                print((
+                        'box={0}, pos=({1}), free_values=({2}), ' + 
+                        'possible_values=({3}), values=({4})'
+                    ).format(n, pos, free_values, possible_values, values)
+                )
+                if len(values) == 1:
+                    value = values.pop()
+                    self._boxes[n][pos].set_value(str(value))
+                    free_values.remove(value)
+                    self._do_display()
         for n in xrange(len(self._columns)):
             free_values = set(xrange(1, self._base+1)) - self._get_column_values(n)
             for pos in self._get_free_column_positions(n):
                 possible_values = self._get_possible_column_cell_values(n, pos)
                 values = free_values.intersection(possible_values)
+                print((
+                        'column={0}, pos=({1}), free_values=({2}), ' + 
+                        'possible_values=({3}), values=({4})'
+                    ).format(n, pos, free_values, possible_values, values)
+                )
                 if len(values) == 1:
-                    print((
-                            'column={0}, pos=({1}), free_values=({2}), ' + 
-                            'possible_values=({3}), values=({4})'
-                        ).format(n, pos, free_values, possible_values, values)
-                    )
                     value = values.pop()
                     self._columns[n][pos].set_value(str(value))
                     free_values.remove(value)
@@ -100,12 +89,12 @@ class Sudoku(Game):
             for pos in self._get_free_row_positions(n):
                 possible_values = self._get_possible_row_cell_values(n, pos)
                 values = free_values.intersection(possible_values)
+                print((
+                        'row={0}, pos=({1}), free_values=({2}), ' + 
+                        'possible_values=({3}), values=({4})'
+                    ).format(n, pos, free_values, possible_values, values)
+                )
                 if len(values) == 1:
-                    print((
-                            'row={0}, pos=({1}), free_values=({2}), ' + 
-                            'possible_values=({3}), values=({4})'
-                        ).format(n, pos, free_values, possible_values, values)
-                    )
                     value = values.pop()
                     self._rows[n][pos].set_value(str(value))
                     free_values.remove(value)
@@ -155,12 +144,21 @@ class Sudoku(Game):
         return(c/self._base)
 
     def _get_possible_box_cell_values(self, box, n):
+         print('_get_possible_box_cell_values(<..>): box={0}, n={1}, grid_pos= {2}'.format(
+                box, n, 
+                self._base * (
+                    int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
+                    int(n // math.sqrt(self._base))
+                ) +
+                int(box % math.sqrt(self._base) * math.sqrt(self._base)) +
+                int(n % math.sqrt(self._base))
+         ))
          return(self._get_possible_cell_values(
                 self._base * (
                     int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
                     int(n // math.sqrt(self._base))
                 ) +
-                int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
+                int(box % math.sqrt(self._base) * math.sqrt(self._base)) +
                 int(n % math.sqrt(self._base))
          ))
 
