@@ -1,18 +1,30 @@
 #!/usr/bin/env python
 
+import math
 import random
 import re
 
+#SUDOKU_EXAMPLE = """
+#    ......68.
+#    ....73..9
+#    3.9....45
+#    49.......
+#    8.3.5.9.2
+#    .......36
+#    96....3.8
+#    7..68....
+#    .28......
+#"""
 SUDOKU_EXAMPLE = """
-    ......68.
-    ....73..9
-    3.9....45
-    49.......
-    8.3.5.9.2
-    .......36
-    96....3.8
-    7..68....
-    .28......
+    1.89432..
+    ..32...7.
+    .6......3
+    7.9....5.
+    .3....7..
+    .5.7..8.4
+    .8...7..6
+    .975.6481
+    5..4.....
 """
 SUDOKU_BASE    = 9
 
@@ -22,7 +34,12 @@ class Game(object):
         self._turn     = 0
 
     def _do_turn(self):
+        if self._finished:
+            self._do_finish()
         self._turn += 1
+
+    def _do_finish(self):
+        sys.exit(0)
 
     def start(self):
         while not(self._finished):
@@ -36,11 +53,16 @@ class Sudoku(Game):
         self._base = base
         self._init_grid(grid)
 
+    def _do_display(self):
+        print('{0}\n'.format(self))
+
     def _do_turn(self):
         super(Sudoku, self)._do_turn()
-        print('{0}\n'.format(self))
+        self._do_display()
         self._find_values_for_grid_positions()
         self._find_cell_positions_for_values()
+        if len(self._get_free_grid_positions()) == 0:
+            self._finished = True
 
     def _find_cell_positions_for_values(self):
 #        for n in xrange(len(self._boxes)):
@@ -49,8 +71,15 @@ class Sudoku(Game):
 #                possible_values = self._get_possible_box_cell_values(n, pos)
 #                values = free_values.intersection(possible_values)
 #                if len(values) == 1:
-#                    self._boxes[n][pos].set_value(str(values.pop()))
-#            print('box[{0}]: ({1})'.format(n, repr(values)))
+#                    print((
+#                            'box={0}, pos=({1}), free_values=({2}), ' + 
+#                            'possible_values=({3}), values=({4})'
+#                        ).format(n, pos, free_values, possible_values, values)
+#                    )
+#                    value = values.pop()
+#                    self._boxes[n][pos].set_value(str(value))
+#                    free_values.remove(value)
+#                    self._do_display()
         for n in xrange(len(self._columns)):
             free_values = set(xrange(1, self._base+1)) - self._get_column_values(n)
             for pos in self._get_free_column_positions(n):
@@ -62,7 +91,10 @@ class Sudoku(Game):
                             'possible_values=({3}), values=({4})'
                         ).format(n, pos, free_values, possible_values, values)
                     )
-                    self._columns[n][pos].set_value(str(values.pop()))
+                    value = values.pop()
+                    self._columns[n][pos].set_value(str(value))
+                    free_values.remove(value)
+                    self._do_display()
         for n in xrange(len(self._rows)):
             free_values = set(xrange(1, self._base+1)) - self._get_row_values(n)
             for pos in self._get_free_row_positions(n):
@@ -74,13 +106,17 @@ class Sudoku(Game):
                             'possible_values=({3}), values=({4})'
                         ).format(n, pos, free_values, possible_values, values)
                     )
-                    self._rows[n][pos].set_value(str(values.pop()))
+                    value = values.pop()
+                    self._rows[n][pos].set_value(str(value))
+                    free_values.remove(value)
+                    self._do_display()
 
     def _find_values_for_grid_positions(self):
         for n in self._get_free_grid_positions():
             possible_cell_values = self._get_possible_cell_values(n)
             if len(possible_cell_values) == 1:
                 self._grid[n].set_value(str(possible_cell_values.pop()))
+                self._do_display()
 
     def _get_box_values(self, n):
         return(self._get_values(self._boxes[n]))
@@ -119,16 +155,21 @@ class Sudoku(Game):
         return(c/self._base)
 
     def _get_possible_box_cell_values(self, box, n):
-# HIERO
-#        return(self._get_possible_cell_values(0))
-        return(set())
+         return(self._get_possible_cell_values(
+                self._base * (
+                    int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
+                    int(n // math.sqrt(self._base))
+                ) +
+                int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
+                int(n % math.sqrt(self._base))
+         ))
 
     def _get_possible_column_cell_values(self, column, n):
-        print('self._base({0})*n({1}) + column({2}) = {3}'.format(self._base, n, column, self._base*n + column))
+        #print('self._base({0})*n({1}) + column({2}) = {3}'.format(self._base, n, column, self._base*n + column))
         return(self._get_possible_cell_values(self._base*n + column))
 
     def _get_possible_row_cell_values(self, row, n):
-        print('self._base({0})*row({1}) + n({2}) = {3}'.format(self._base, row, n, self._base*row + n))
+        #print('self._base({0})*row({1}) + n({2}) = {3}'.format(self._base, row, n, self._base*row + n))
         return(self._get_possible_cell_values(self._base*row + n))
 
     def _get_possible_cell_values(self, n):
