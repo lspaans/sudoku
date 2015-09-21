@@ -232,6 +232,89 @@ class Cell(object):
             value = ' '
         return('[{0}]'.format(value))
 
+class SetHash(object):
+    def __init__(self, keys=(), values=()):
+        self._keys   = set()
+        self._values = set()
+        self.append_keys(keys)
+        self.append_values(values)
+
+    def get_keys(self):
+        return(self._keys)
+
+    def get_values(self):
+        return(self._values)
+
+    def append_keys(self, keys):
+        if self._valid_keys(keys):
+            self._keys.update(keys)
+        else:
+            raise(ValueError('Invalid "keys"-argument'))
+
+    def append_values(self, values):
+        if self._valid_values(values):
+            self._values.update(values)
+        else:
+            raise(ValueError('Invalid "values"-argument'))
+
+    def _valid_keys(self, keys):
+        if (
+            not isinstance(keys, (list, tuple)) or
+            len(filter(lambda o: not(isinstance(o, (str, int))), keys)) > 0 or
+            len(keys) == 0
+        ):
+            return(False)
+        return(True)
+
+    def _valid_values(self, values):
+        if (
+            not isinstance(values, (list, tuple)) or
+            len(filter(lambda o: not(isinstance(o, (str, int))), values)) > 0
+        ):
+            return(False)
+        return(True)
+
+    def __str__(self):
+        return('({0}) = ({1})'.format(
+            ', '.join(map(lambda s: str(s), self.get_keys())),
+            ', '.join(map(lambda s: str(s), self.get_values()))
+        ))
+
+    def __repr__(self):
+        return(self.__str__())
+
+class SetHashSet(object):
+    def __init__(self, values=()):
+        self._values = []
+        self.append_values(values)
+
+    def append_values(self, values):
+        if self._valid_values(values):
+            if isinstance(values, SetHash):
+                self._values.append(values)
+            else:
+                self._values.extend(values)
+        else:
+            raise(ValueError('Invalid "values"-argument'))
+
+    def get_values(self):
+        return(self._values)
+
+    def _valid_values(self, values):
+        if (
+            isinstance(values, (list, tuple)) and
+            len(filter(lambda o: not(isinstance(o, SetHash)), values)) == 0
+        ) or isinstance(values, SetHash):
+            return(True)
+        return(False)
+
+    def __str__(self):
+        return('\n'.join(map(str, self.get_values())))
+
+    def __repr__(self):
+        return(self.__str__())
+
+
 def main():
     Sudoku().start()
 
