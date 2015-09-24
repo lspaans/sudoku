@@ -232,12 +232,12 @@ class Cell(object):
             value = ' '
         return('[{0}]'.format(value))
 
-class SetHash(object):
+class SetMap(object):
     def __init__(self, keys=(), values=()):
         self._keys   = set()
         self._values = set()
-        self.append_keys(keys)
-        self.append_values(values)
+        self.add_keys(keys)
+        self.add_values(values)
 
     def get_keys(self):
         return(self._keys)
@@ -245,21 +245,51 @@ class SetHash(object):
     def get_values(self):
         return(self._values)
 
-    def append_keys(self, keys):
+    def add_keys(self, keys):
         if self._valid_keys(keys):
             self._keys.update(keys)
         else:
             raise(ValueError('Invalid "keys"-argument'))
 
-    def append_values(self, values):
+    def delete_keys(self, keys):
+        deletes = 0
+        if self._valid_keys(keys):
+            deletes = len(self._keys.intersection(keys))
+            self._keys = self._keys - keys
+            return(deletes)
+        else:
+            raise(ValueError('Invalid "keys"-argument'))
+
+    def delete_values(self, values):
+        deletes = 0
+        if self._valid_values(values):
+            deletes = len(self._values.intersection(values))
+            self._values = self._values - values
+            return(deletes)
+        else:
+            raise(ValueError('Invalid "values"-argument'))
+
+    def add_values(self, values):
         if self._valid_values(values):
             self._values.update(values)
         else:
             raise(ValueError('Invalid "values"-argument'))
 
+    def has_keys(self, keys):
+        return(self.get_keys().issuperset(keys))
+
+    def has_values(self, values):
+        return(self.get_values().issuperset(values))
+
+    def matches_keys(self, keys):
+        return(self.get_keys() == set(keys))
+
+    def matches_values(self, values):
+        return(self.get_values() == set(values))
+
     def _valid_keys(self, keys):
         if (
-            not isinstance(keys, (list, tuple)) or
+            not isinstance(keys, (list, set, tuple)) or
             len(filter(lambda o: not(isinstance(o, (str, int))), keys)) > 0 or
             len(keys) == 0
         ):
@@ -268,7 +298,7 @@ class SetHash(object):
 
     def _valid_values(self, values):
         if (
-            not isinstance(values, (list, tuple)) or
+            not isinstance(values, (list, set, tuple)) or
             len(filter(lambda o: not(isinstance(o, (str, int))), values)) > 0
         ):
             return(False)
@@ -283,28 +313,55 @@ class SetHash(object):
     def __repr__(self):
         return(self.__str__())
 
-class SetHashSet(object):
+class SetMapSet(object):
     def __init__(self, values=()):
-        self._values = []
-        self.append_values(values)
+        self.set_values(values)
 
-    def append_values(self, values):
+    def add_values(self, values):
         if self._valid_values(values):
-            if isinstance(values, SetHash):
-                self._values.append(values)
+            if isinstance(values, SetMap):
+                self._append_value(values)
             else:
-                self._values.extend(values)
+                for value in values:
+                    self.add_values(value)
         else:
             raise(ValueError('Invalid "values"-argument'))
 
     def get_values(self):
         return(self._values)
 
+    def set_values(self, values=()):
+        self._values = []
+        self.add_values(values)
+
+    def _append_value(self, sh):
+        merged = False
+        for n in xrange(len(self._values)):
+            if self._values[n].matches_values(sh.get_values()):
+                self._values[n].add_keys(sh.get_keys())
+                merged = True
+        if merged is False:
+            self._values.append(sh)
+        self._simplify()
+
+    def _simplify(self):
+        changes = True
+        while changes is True:
+            changes = False
+            for a in self.get_values():
+                if len(a.get_values()) != len(a.get_keys()):
+                    continue
+                for b in self.get_values():
+                    if a.matches_keys(b.get_keys()):
+                        continue
+                    if b.delete_values(a.get_values()) > 0:
+                        changes = True
+
     def _valid_values(self, values):
         if (
             isinstance(values, (list, tuple)) and
-            len(filter(lambda o: not(isinstance(o, SetHash)), values)) == 0
-        ) or isinstance(values, SetHash):
+            len(filter(lambda o: not(isinstance(o, SetMap)), values)) == 0
+        ) or isinstance(values, SetMap):
             return(True)
         return(False)
 
@@ -313,7 +370,6 @@ class SetHashSet(object):
 
     def __repr__(self):
         return(self.__str__())
-
 
 def main():
     Sudoku().start()
