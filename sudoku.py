@@ -15,12 +15,13 @@ SUDOKU_EXAMPLE = """
     7..68....
     .28......
 """
-SUDOKU_BASE    = 9
+SUDOKU_BASE = 9
+
 
 class Game(object):
     def __init__(self, *args, **kwargs):
         self._finished = False
-        self._turn     = 0
+        self._turn = 0
 
     def _do_turn(self):
         if self._finished:
@@ -33,6 +34,7 @@ class Game(object):
     def start(self):
         while not(self._finished):
             self._do_turn()
+
 
 class Sudoku(Game):
     def __init__(
@@ -55,13 +57,15 @@ class Sudoku(Game):
 
     def _find_cell_positions_for_values(self):
         for n in xrange(len(self._boxes)):
-            free_values = set(xrange(1, self._base+1)) - self._get_box_values(n)
+            free_values = (
+                set(xrange(1, self._base+1)) - self._get_box_values(n)
+            )
             for pos in self._get_free_box_positions(n):
                 possible_values = self._get_possible_box_cell_values(n, pos)
                 values = free_values.intersection(possible_values)
                 print((
-                        'box={0}, pos=({1}), free_values=({2}), ' + 
-                        'possible_values=({3}), values=({4})'
+                    'box={0}, pos=({1}), free_values=({2}), ' +
+                    'possible_values=({3}), values=({4})'
                     ).format(n, pos, free_values, possible_values, values)
                 )
                 if len(values) == 1:
@@ -70,13 +74,15 @@ class Sudoku(Game):
                     free_values.remove(value)
                     self._do_display()
         for n in xrange(len(self._columns)):
-            free_values = set(xrange(1, self._base+1)) - self._get_column_values(n)
+            free_values = (
+                set(xrange(1, self._base+1)) - self._get_column_values(n)
+            )
             for pos in self._get_free_column_positions(n):
                 possible_values = self._get_possible_column_cell_values(n, pos)
                 values = free_values.intersection(possible_values)
                 print((
-                        'column={0}, pos=({1}), free_values=({2}), ' + 
-                        'possible_values=({3}), values=({4})'
+                    'column={0}, pos=({1}), free_values=({2}), ' +
+                    'possible_values=({3}), values=({4})'
                     ).format(n, pos, free_values, possible_values, values)
                 )
                 if len(values) == 1:
@@ -85,13 +91,15 @@ class Sudoku(Game):
                     free_values.remove(value)
                     self._do_display()
         for n in xrange(len(self._rows)):
-            free_values = set(xrange(1, self._base+1)) - self._get_row_values(n)
+            free_values = (
+                set(xrange(1, self._base+1)) - self._get_row_values(n)
+            )
             for pos in self._get_free_row_positions(n):
                 possible_values = self._get_possible_row_cell_values(n, pos)
                 values = free_values.intersection(possible_values)
                 print((
-                        'row={0}, pos=({1}), free_values=({2}), ' + 
-                        'possible_values=({3}), values=({4})'
+                    'row={0}, pos=({1}), free_values=({2}), ' +
+                    'possible_values=({3}), values=({4})'
                     ).format(n, pos, free_values, possible_values, values)
                 )
                 if len(values) == 1:
@@ -111,13 +119,13 @@ class Sudoku(Game):
         return(self._get_values(self._boxes[n]))
 
     def _get_box_number(self, c):
-        return(((c/self._base)/3)*3 + (c%self._base)/3)
+        return(((c/self._base)/3)*3 + (c % self._base)/3)
 
     def _get_column_values(self, n):
         return(self._get_values(self._columns[n]))
 
     def _get_column_number(self, c):
-        return(c%self._base)
+        return(c % self._base)
 
     def _get_free_box_positions(self, n):
         return(self._get_free_positions(self._boxes[n]))
@@ -130,11 +138,10 @@ class Sudoku(Game):
 
     def _get_free_grid_positions(self):
         return(self._get_free_positions(self._grid))
-        
+
     def _get_free_positions(self, cells):
         return(filter(
-            lambda n: cells[n].get_value() == 0,
-                xrange(len(cells))
+            lambda n: cells[n].get_value() == 0, xrange(len(cells))
         ))
 
     def _get_row_values(self, n):
@@ -144,50 +151,55 @@ class Sudoku(Game):
         return(c/self._base)
 
     def _get_possible_box_cell_values(self, box, n):
-         print('_get_possible_box_cell_values(<..>): box={0}, n={1}, grid_pos= {2}'.format(
-                box, n, 
+        print((
+            '_get_possible_box_cell_values(<..>): ' +
+            'box={0}, n={1}, grid_pos= {2}').format(
+                box, n,
                 self._base * (
                     int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
                     int(n // math.sqrt(self._base))
                 ) +
                 int(box % math.sqrt(self._base) * math.sqrt(self._base)) +
                 int(n % math.sqrt(self._base))
-         ))
-         return(self._get_possible_cell_values(
-                self._base * (
-                    int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
-                    int(n // math.sqrt(self._base))
-                ) +
-                int(box % math.sqrt(self._base) * math.sqrt(self._base)) +
-                int(n % math.sqrt(self._base))
-         ))
+        ))
+        return(self._get_possible_cell_values(
+            self._base * (
+                int(box // math.sqrt(self._base) * math.sqrt(self._base)) +
+                int(n // math.sqrt(self._base))
+            ) +
+            int(box % math.sqrt(self._base) * math.sqrt(self._base)) +
+            int(n % math.sqrt(self._base))
+        ))
 
     def _get_possible_column_cell_values(self, column, n):
-        #print('self._base({0})*n({1}) + column({2}) = {3}'.format(self._base, n, column, self._base*n + column))
         return(self._get_possible_cell_values(self._base*n + column))
 
     def _get_possible_row_cell_values(self, row, n):
-        #print('self._base({0})*row({1}) + n({2}) = {3}'.format(self._base, row, n, self._base*row + n))
         return(self._get_possible_cell_values(self._base*row + n))
 
     def _get_possible_cell_values(self, n):
-        return(set(xrange(1, self._base+1)) - set(
-            map(lambda cell: cell.get_value(), (
-                self._boxes[self._get_box_number(n)] +
-                self._columns[self._get_column_number(n)] +
-                self._rows[self._get_row_number(n)]
-        ))))
+        return((
+            set(xrange(1, self._base+1)) - set(
+                map(lambda cell: cell.get_value(), (
+                    self._boxes[self._get_box_number(n)] +
+                    self._columns[self._get_column_number(n)] +
+                    self._rows[self._get_row_number(n)]
+                ))
+            )
+        ))
 
     def _get_values(self, cells):
-        return(set(map(lambda cell: cell.get_value(),
-            filter(lambda cell: cell.get_value() != 0, cells)
-        )))
+        return(set(
+            map(lambda cell: cell.get_value(), filter(
+                lambda cell: cell.get_value() != 0, cells
+            ))
+        ))
 
     def _init_grid(self, grid):
-        self._grid    = []
+        self._grid = []
         self._columns = map(lambda n: [], xrange(self._base))
-        self._rows    = map(lambda n: [], xrange(self._base))
-        self._boxes   = map(lambda n: [], xrange(self._base))
+        self._rows = map(lambda n: [], xrange(self._base))
+        self._boxes = map(lambda n: [], xrange(self._base))
         for n, value in enumerate(
             filter(lambda v: re.match(r'[\d\.]', v), grid)
         ):
@@ -201,6 +213,7 @@ class Sudoku(Game):
         return('\n'.join(map(lambda n: ''.join(
             map(lambda cell: str(cell), self._rows[n])), xrange(self._base))
         ))
+
 
 class Cell(object):
     def __init__(self, value, min=0, max=SUDOKU_BASE):
@@ -232,9 +245,10 @@ class Cell(object):
             value = ' '
         return('[{0}]'.format(value))
 
+
 class SetMap(object):
     def __init__(self, keys=(), values=()):
-        self._keys   = set()
+        self._keys = set()
         self._values = set()
         self.add_keys(keys)
         self.add_values(values)
@@ -313,6 +327,7 @@ class SetMap(object):
     def __repr__(self):
         return(self.__str__())
 
+
 class SetMapSet(object):
     def __init__(self, values=()):
         self.set_values(values)
@@ -370,6 +385,7 @@ class SetMapSet(object):
 
     def __repr__(self):
         return(self.__str__())
+
 
 def main():
     Sudoku().start()
