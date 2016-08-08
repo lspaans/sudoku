@@ -1,15 +1,22 @@
 #!/usr/bin/env python
 
+import math
+
 class Cell(object):
 
     VALUE = 0
 
-    def __init__(self, value=VALUE):
+    def __init__(self, value=None):
+        if value is None:
+            value = self.VALUE
+
         self.value = value
+
 
     @property
     def value(self):
         return(self._value)
+
 
     @value.setter
     def value(self, value):
@@ -23,8 +30,10 @@ class Cell(object):
                 "Illegal Cell-value: '{value}'".format(value=value)
             )
 
+
     def __str__(self):
-        return("({value})".format(value=self.value))
+        return("[{value}]".format(value=self.value))
+
 
     def __repr__(self):
         return(self.__str__())
@@ -33,20 +42,30 @@ class Cell(object):
 class CellGroup(object):
 
     MAXIMUM = 1
+    NEWLINE_POSITION = MAXIMUM
+    SEPARATOR = " "
+    UNIQUE = False
 
-    def __init__(self, cells=None, unique=False, maximum=MAXIMUM):
-        self.unique = unique
-        self.maximum = maximum
+    def __init__(self, cells=None, unique=None, maximum=None):
+
+        self.unique = self.UNIQUE if unique is None else unique
+        self.maximum = self.MAXIMUM if maximum is None else maximum
 
         if cells is None:
-            cells = map(lambda c: Cell(), xrange(self._maximum))
+            if self.unique:
+                cells = map(lambda n: Cell(n), xrange(1, self.maximum+1))
+            else:
+                cells = map(lambda n: Cell(), xrange(self.maximum))
 
         self._init_cells(cells)
 
-    def _init_cells(self, cells=[]):
-        self._cells = cells
 
-    def add_cell(self, cell):
+    def _init_cells(self, cells=[]):
+        self._cells = []
+        self.cells = cells
+
+
+    def add(self, cell):
         if isinstance(cell, Cell):
             if (
                 self.unique and
@@ -61,18 +80,22 @@ class CellGroup(object):
                 "Illegal object-type: '{type}'".format(type=type(cell))
             )
 
+
     @property
     def cells(self):
         return(self._cells)
 
+
     @cells.setter
     def cells(self, cells):
         for cell in cells:
-            self.add_cell(cell)
+            self.add(cell)
+
 
     @property
     def maximum(self):
         return(self._maximum)
+
 
     @maximum.setter
     def maximum(self, maximum):
@@ -83,9 +106,11 @@ class CellGroup(object):
                 "Illegal value for 'maximum': '{value}'".format(value=maximum)
             )
 
+
     @property
     def unique(self):
         return(self._unique)
+
 
     @unique.setter
     def unique(self, unique):
@@ -96,32 +121,55 @@ class CellGroup(object):
                 "Illegal value for 'unique': '{value}'".format(value=unique)
             )
 
+
     def __str__(self):
-        return(' '.join(map(lambda c: str(c), self.cells)))
+        return(
+            "".join(map(lambda (n, value): "{value}{separator}".format(
+                value=value,
+                separator=(
+                    "\n" if n % self.NEWLINE_POSITION == 0 else self.SEPARATOR
+                )
+            ),
+            enumerate(self.cells, start=1)
+        )))
+
 
     def __repr__(self):
         return(self.__str__())
 
-class SudokuCellGroup(CellGroup):
+
+class Column(CellGroup):
 
     MAXIMUM = 9
+    NEWLINE_POSITION = MAXIMUM
+    SEPARATOR = "\n"
+    UNIQUE = True
 
-class Column(SudokuCellGroup):
 
-    pass
+class Row(CellGroup):
 
-class Row(SudokuCellGroup):
+    MAXIMUM = 9
+    NEWLINE_POSITION = MAXIMUM
+    UNIQUE = True
 
-    pass
 
-class Tile(SudokuCellGroup):
+class Tile(CellGroup):
 
-    pass
+    MAXIMUM = 9
+    NEWLINE_POSITION = round(math.sqrt(MAXIMUM))
+    UNIQUE = True
 
+
+class Board(object):
+
+    def __init__(self):
+        pass
 
 def main():
-    c = Column()
-    print(c)
+    print(Cell())
+    print(Column())
+    print(Row())
+    print(Tile())
 
 if __name__ == '__main__':
     main()
