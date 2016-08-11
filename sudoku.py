@@ -2,7 +2,8 @@
 
 import math
 
-from cell import Cell, CellGroup;
+from cell import Cell, CellGroup
+from solution import Solution, SolutionSet
 
 class CellSet(CellGroup):
 
