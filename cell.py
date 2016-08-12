@@ -30,7 +30,7 @@ class Cell(object):
 
 
     def __str__(self):
-        return("[{value}]".format(value=self.value))
+        return("[{value}]".format(value=self.value or " "))
 
 
     def __repr__(self):
@@ -51,7 +51,7 @@ class CellGroup(object):
 
         if cells is None:
             if self.unique:
-                cells = map(lambda n: Cell(n), xrange(1, self.maximum+1))
+                cells = map(lambda n: Cell(n), xrange(1, self.maximum + 1))
             else:
                 cells = map(lambda n: Cell(), xrange(self.maximum))
 
@@ -67,6 +67,7 @@ class CellGroup(object):
         if isinstance(cell, Cell):
             if (
                 self.unique and
+                not(cell.value in (0, "0", " ", "")) and
                 cell.value in map(lambda c: c.value, self.cells)
             ):
                 raise ValueError(
