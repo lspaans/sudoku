@@ -11,6 +11,23 @@ class CellSet(CellGroup):
     NEWLINE_POSITION = MAXIMUM
     UNIQUE = True
 
+    def has_value(self, value):
+        for cell in self.cells:
+            if cell.value == value:
+                return(True)
+        return(False)
+
+
+    def get_value_position(self, value):
+        for position, cell in enumerate(self.cells):
+            if cell.value == value:
+                return(position)
+
+        raise ValueError("Value {value} does not exist in {type}".format(
+            value=value,
+            type=type(self)
+        ))
+
 
 class Column(CellSet):
 
@@ -69,24 +86,26 @@ class Board(object):
     def cells(self, cells):
         if self._is_valid_input(cells):
             self._cells = []
-            for (n, cell) in enumerate(cells[:CellSet.MAXIMUM**2]):
+            for (position, cell) in enumerate(cells[:CellSet.MAXIMUM**2]):
                 self._cells.append(cell)
-                self._columns[self._get_cell_column(n)].add(cell)
-                self._rows[self._get_cell_row(n)].add(cell)
-                self._tiles[self._get_cell_tile(n)].add(cell)
+                self._columns[self.get_column(position)].add(cell)
+                self._rows[self.get_row(position)].add(cell)
+                self._tiles[self.get_tile(position)].add(cell)
         else:
             raise ValueError("Cannot initialize cells")
 
-    def _get_cell_column(self, n):
-        return(n%Column.MAXIMUM)
+    def get_column(self, position):
+        return(position%Column.MAXIMUM)
 
-    def _get_cell_row(self, n):
-        return(n//Row.MAXIMUM)
+    def get_row(self, position):
+        return(position//Row.MAXIMUM)
 
-    def _get_cell_tile(self, n):
-        return(int(
-            (n // math.sqrt(Tile.MAXIMUM) ** 3) * math.sqrt(Tile.MAXIMUM) +
-            (n % Tile.MAXIMUM) // math.sqrt(Tile.MAXIMUM)
+    def get_tile(self, position):
+        return(int((
+                (position // math.sqrt(Tile.MAXIMUM) ** 3) *
+                math.sqrt(Tile.MAXIMUM)
+            ) +
+            (position % Tile.MAXIMUM) // math.sqrt(Tile.MAXIMUM)
         ))
 
     def _is_valid_input(self, values):

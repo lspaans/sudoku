@@ -21,6 +21,22 @@ def main():
     print(board.columns[0])
     print
     print(board.tiles[0])
+    print
+    for position, cell in enumerate(board.cells):
+        print((
+            "Cell: " +
+            "position={position}," +
+            "value={value}," +
+            "column={column}," +
+            "row={row}," +
+            "tile={tile},"
+        ).format(
+            position=position,
+            value=cell.value,
+            column=board.get_column(position),
+            row=board.get_row(position),
+            tile=board.get_tile(position)
+        ))
 
 if __name__ == '__main__':
     main()
