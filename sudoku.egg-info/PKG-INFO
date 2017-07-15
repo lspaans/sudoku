@@ -1,0 +1,17 @@
+Metadata-Version: 1.1
+Name: sudoku
+Version: 0.1.8
+Summary: A Python script for solving Sudokus
+Home-page: https://github.com/lspaans/sudoku.git
+Author: Léon Spaans
+Author-email: leons{at}gridpoint[dot]nl
+License: UNKNOWN
+Description: For more information, please see "README.md".
+Keywords: sudoku solver
+Platform: UNKNOWN
+Classifier: Development Status :: 4 - Beta
+Classifier: Natural Language :: English
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Topic :: Utilities

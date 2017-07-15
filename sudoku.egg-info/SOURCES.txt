@@ -1,0 +1,8 @@
+solvesudoku
+setdict/__init__.py
+setdict/setdict.py
+sudoku.egg-info/PKG-INFO
+sudoku.egg-info/SOURCES.txt
+sudoku.egg-info/dependency_links.txt
+sudoku.egg-info/not-zip-safe
+sudoku.egg-info/top_level.txt

@@ -1,0 +1,12 @@
+"""sudoku"""
+
+from setdict import Setdict
+
+
+def main():
+    s = Setdict()
+
+
+
+if __name__ == "__main__":
+    main()
