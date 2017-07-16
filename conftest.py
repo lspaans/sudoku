@@ -1,3 +1,3 @@
-import pytest
+import pytest  # NOQA
 
-from setdict.setdict import Setdict
+from setdict.setdict import Setdict  # NOQA

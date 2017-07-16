@@ -1,5 +1,6 @@
 """setdict"""
 
+
 class Setdict(object):
 
     def __init__(self, value=None):
@@ -17,7 +18,7 @@ class Setdict(object):
     def get(self, key, default=None):
         self._validate_key(key)
 
-        if self.has_key(key):
+        if key in self:
             return self.value[tuple(key)]
 
         if default is not None:
@@ -35,24 +36,14 @@ class Setdict(object):
     def get_value(self, key):
         self._validate_key(key)
 
-        if self.has_key(key):
+        if key in self:
             return self.value[tuple(key)]
 
         raise KeyError("key {key} does not exist".format(key=key))
 
-
-    def has_key(self, key):
-        self._validate_key(key)
-
-        if tuple(key) in self.value.keys():
-            return True
-
-        return False
-
     def has_value(self, value):
         if value in self.value.values():
             return True
-
         return False
 
     def set(self, key, value):
@@ -75,6 +66,13 @@ class Setdict(object):
 
         for key, value in value.items():
             self.set(set(key), value)
+
+    def __contains__(self, key):
+        self._validate_key(key)
+
+        if tuple(key) in self.value.keys():
+            return True
+        return False
 
     def __len__(self):
         return len(self.value)

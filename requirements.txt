@@ -1,2 +1,5 @@
 tox-travis
 coveralls
+pycodestyle
+pylint
+flake8

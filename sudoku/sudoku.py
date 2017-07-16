@@ -2,6 +2,7 @@
 
 from game import Game
 
+
 class Sudoku(Game):
 
     def __init__(self):
