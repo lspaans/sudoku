@@ -1,5 +1,7 @@
+*.pyc
 __pycache__
 .cache
 .idea
 .tox
+setdict/__pycache__
 sudoku.egg-info

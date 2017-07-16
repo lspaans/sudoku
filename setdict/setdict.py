@@ -15,15 +15,20 @@ class Setdict(object):
             )
 
     def get(self, key, default=None):
-        if self.has_key(key):
-            return self.value[key]
+        self._validate_key(key)
 
-        return default
+        if self.has_key(key):
+            return self.value[tuple(key)]
+
+        if default is not None:
+            return default
+
+        raise KeyError("key {key} does not exist".format(key=key))
 
     def get_key(self, value):
         for key in self.value.keys():
             if self.value[key] == value:
-                return key
+                return set(key)
 
         raise ValueError("value {value} does not exist".format(value=value))
 
@@ -31,7 +36,7 @@ class Setdict(object):
         self._validate_key(key)
 
         if self.has_key(key):
-            return self.value[key]
+            return self.value[tuple(key)]
 
         raise KeyError("key {key} does not exist".format(key=key))
 
@@ -69,10 +74,18 @@ class Setdict(object):
             )
 
         for key, value in value.items():
-            self.set(key, value)
+            self.set(set(key), value)
+
+    def __len__(self):
+        return len(self.value)
 
     def __str__(self):
-        return str(self.value)
+        import re
+        return re.sub(
+            re.compile("(\([^\)]*\)):"),
+            "set(\g<1>):",
+            str(self.value)
+        )
 
     def __repr__(self):
-        return self.__str__()
+        return "'{value}'".format(value=self.__str__())
