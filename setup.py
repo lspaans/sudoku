@@ -5,10 +5,10 @@
 from setuptools import setup
 
 __author__ = "Léon Spaans"
-__date__ = "2017-04-10"
+__date__ = "2017-07-16"
 __email__ = "leons{at}gridpoint[dot]nl"
 __status__ = "Development"
-__version__ = "0.1.8"
+__version__ = "0.1.0"
 
 setup(
     name="sudoku",
@@ -20,9 +20,11 @@ setup(
     url="https://github.com/lspaans/sudoku.git",
     scripts=["solvesudoku"],
     packages=[
-        "setdict"
+        "game",
+        "setdict",
+        "sudoku"
     ],
-    long_description=("For more information, please see \"README.md\"."),
+    long_description=("For more information, please see \"README.rst\"."),
     classifiers=[
         "Development Status :: 4 - Beta",
         "Natural Language :: English",
