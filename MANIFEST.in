@@ -1,0 +1,8 @@
+include CHANGES
+include INSTALL
+include MANIFEST.in
+include README.rst
+include solvesudoku
+
+
+global-exclude *.py[co]
