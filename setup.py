@@ -22,6 +22,7 @@ setup(
     packages=[
         "game",
         "setdict",
+        "setmap",
         "sudoku"
     ],
     long_description=("For more information, please see \"README.rst\"."),
