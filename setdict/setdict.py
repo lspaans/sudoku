@@ -1,112 +1,108 @@
-"""setdict"""
+"""https://stackoverflow.com/questions/3387691/how-to-perfectly-override-a-dict"""
 
-import re
+from itertools import chain
 
+try:              # Python 2
+    str_base = basestring
+    items = 'iteritems'
+except NameError: # Python 3
+    str_base = str, bytes, bytearray
+    items = 'items'
 
-class Setdict(object):
+class Setdict(dict):
     """docstring"""
 
-    MESSAGE = {
-        "en_US": {
-            "wrong_key_type": "key \"{key}\" is not of type set()",
-            "wrong_value_type": "value \"{value}\" is not of type dict()",
-            "missing_key": "key {key} does not exist",
-            "missing_value": "value {value} does not exist"
-        }
-    }
-
-    def __init__(self, value=None, lang="en_US"):
+    def __new__(cls, *args, **kwargs):
         """docstring"""
-        self._value = {}
-        self._lang = lang
-
-        if value is None:
-            self.value = {}
-        else:
-            self.value = value
-
-    def get(self, key, default=None):
-        """docstring"""
-        if not isinstance(key, (set,)):
-            raise TypeError(self._message("wrong_key_type", key=key))
-
-        if key in self:
-            return self.value[tuple(key)]
-
-        if default is not None:
-            return default
-
-        raise KeyError(self._message("missing_key", key=key))
-
-    def get_key(self, value):
-        """docstring"""
-        for key in self.value.keys():
-            if self.value[key] == value:
-                return set(key)
-
-        raise KeyError(self._message("missing_value", value=value))
-
-    def get_value(self, key):
-        """docstring"""
-        if not isinstance(key, (set,)):
-            raise TypeError(self._message("wrong_key_type", key=key))
-
-        if key in self:
-            return self.value[tuple(key)]
-
-        raise KeyError(self._message("missing_key", key=key))
-
-    def has_value(self, value):
-        """docstring"""
-        if value in self.value.values():
-            return True
-        return False
-
-    def set(self, key, value):
-        """docstring"""
-        if not isinstance(key, (set,)):
-            raise TypeError(self._message("wrong_key_type", key=key))
-
-        self._value[tuple(key)] = value
-
-    @property
-    def value(self):
-        """docstring"""
-        return self._value
-
-    @value.setter
-    def value(self, value):
-        """docstring"""
-        if not isinstance(value, (dict,)):
-            raise TypeError(self._message("wrong_value_type", value=value))
-
-        for _key, _value in value.items():
-            self.set(set(_key), _value)
-
-    def _message(self, message, **kwargs):
-        return Setdict.MESSAGE[self._lang][message].format(**kwargs)
+        return super(Setdict, cls).__new__(cls, *args, **kwargs)
 
     def __contains__(self, key):
         """docstring"""
-        if not isinstance(key, (set,)):
-            raise TypeError(self._message("wrong_key_type", key=key))
+        self._validate_key(key)
 
-        if tuple(key) in self.value.keys():
-            return True
-        return False
+        return super(Setdict, self).__contains__(tuple(key))
 
-    def __len__(self):
+    def __setitem__(self, key, value):
         """docstring"""
-        return len(self.value)
+        self._validate_key(key)
+
+        return super(Setdict, self).__setitem__(tuple(key), value)
+
+    @staticmethod
+    def _process_args(mapping=(), **kwargs):
+        if hasattr(mapping, items):
+            mapping = getattr(mapping, items)()
+        return (
+            (tuple(key), value) for key, value in chain(
+                mapping, getattr(kwargs, items)()
+            )
+        )
+
+    @staticmethod
+    def _validate_key(key):
+        """docstring"""
+        if not isinstance(key, set):
+            raise TypeError("key {key} is not of type set".format(key=key))
+
+    def copy(self):
+        """docstring"""
+        return type(self)(self)
+
+    def get(self, key, *nargs):
+        """docstring"""
+        self._validate_key(key)
+
+        return super(Setdict, self).get(tuple(key), *nargs)
+
+    def items(self):
+        """docstring"""
+        return map(
+            lambda item: (set(item[0]), item[1]),
+            super(Setdict, self).items()
+        )
+
+    def keys(self):
+        """docstring"""
+        return [set(key) for key in super(Setdict, self).keys()]
+
+    def pop(self, key, *nargs, **kwargs):
+        """docstring"""
+        self._validate_key(key)
+
+        return super(Setdict, self).pop(tuple(key), *nargs, **kwargs)
+
+    def update(self, mapping=(), **kwargs):
+        """docstring"""
+        for arg in kwargs:
+            print("arg={arg}".format(arg=arg))
+        for key, _ in mapping.items():
+            if not isinstance(key, tuple):
+                raise TypeError("key {key} is not of type tuple".format(
+                    key=key
+                ))
+
+        super(Setdict, self).update(self._process_args(mapping, **kwargs))
 
     def __str__(self):
         """docstring"""
-        return re.sub(
-            re.compile(r"(\([^\)]*\)):"),
-            r"set(\g<1>):",
-            str(self.value)
+        print("__str__")
+        return "Setdict({{{setdict}}})".format(
+            setdict=", ".join([
+                "{key}: {value}".format(
+                    key=str(set(key)),
+                    value=str(value)
+                ) for key, value in self.items()
+            ])
         )
 
     def __repr__(self):
         """docstring"""
-        return "'{value}'".format(value=self.__str__())
+        print("__repr__")
+        return "Setdict({{{setdict}}})".format(
+            setdict=", ".join([
+                "{key}: {value}".format(
+                    key=str(tuple(key)),
+                    value=str(value)
+                ) for key, value in self.items()
+            ])
+        )
