@@ -350,13 +350,10 @@ class Sudoku(object):
 
     def solve_cell_index_based(self):
         for idx in self.board.cells.empty_cell_indices:
-            solutions = None
+            cellists = self.board.get_celllists_at_cell_index(idx)
+            solutions = set(cellists[0].missing_numbers)
 
-            for n, celllist in enumerate(
-                self.board.get_celllists_at_cell_index(idx)
-            ):
-                if n == 0:
-                    solutions = set(celllist.missing_numbers)
+            for celllist in cellists[1:]:
                 solutions &= set(celllist.missing_numbers)
 
             if len(solutions) == 1:
@@ -366,7 +363,10 @@ class Sudoku(object):
         for idx in self.board.cells.empty_cell_indices:
             cell_indices = None
 
-
+            for n, celllist in enumerate(
+                self.board.get_celllists_at_cell_index(idx)
+            ):
+                pass
 
     @staticmethod
     def get_generated_board():
