@@ -76,7 +76,7 @@ class Cell(object):
 
 
 class CellList(object):
-    """Represents Sudoku columns, grids, rows and all board cells."""
+    """Represents Sudoku columns, grids, rows and board cells."""
 
     _FORCE_UNIQUE = True
     _GROUP_BY = 9
