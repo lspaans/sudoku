@@ -4,7 +4,7 @@
 
 import sys
 
-
+# From in air entertainment set in Boeing Dreamliner (KLM flight)
 EASY = (
     ".5.1968.." +
     ".8.342956" +
@@ -17,6 +17,7 @@ EASY = (
     "..9538.2."
 )
 
+# From iOS Sudoku app
 INSANE = (
     "..5.6.98." +
     "7.9.2.6.1" +
@@ -29,6 +30,7 @@ INSANE = (
     ".....3.2."
 )
 
+# https://www.telegraph.co.uk/news/science/science-news/9359579/Worlds-hardest-sudoku-can-you-crack-it.html
 HARDEST = (
     "8........" +
     "..36....." +
