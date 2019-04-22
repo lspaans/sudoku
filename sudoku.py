@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
+"""A Sudoku puzzle solver"""
+
 import sys
 
 
 class Unsolvable(Exception):
-    pass
+    """Raised when Sudoku cannot be solved"""
 
 
 class Cell(object):
+    """Represents a Sudoku cell."""
+
     def __init__(self, value):
         self._value = None
         self.value = value
@@ -34,6 +38,8 @@ class Cell(object):
 
 
 class CellList(object):
+    """Represents Sudoku columns, grids, rows and all board cells."""
+
     _FORCE_UNIQUE = True
     _GROUP_BY = 9
     _NUMBER_OF_CELLS = 9
@@ -119,18 +125,26 @@ class CellList(object):
 
 
 class Column(CellList):
+    """Implementation of CellList for simulating Sudoku rows."""
+
     _GROUP_BY = 1
 
 
 class Grid(CellList):
+    """Implementation of CellList for simulating Sudoku grids."""
+
     _GROUP_BY = 3
 
 
 class Row(CellList):
+    """Implementation of CellList for simulating Sudoku rows."""
+
     _GROUP_BY = 9
 
 
 class BoardCellList(CellList):
+    """Implementation of CellList for simulating all Sudoku cells."""
+
     _FORCE_UNIQUE = False
     _GROUP_BY = 81
     _NUMBER_OF_CELLS = 81
@@ -140,6 +154,8 @@ class BoardCellList(CellList):
 
 
 class Board(object):
+    """Represents a Sudoku board."""
+
     def __init__(self, celllists):
         self._cells = None
         self._celllists = None
@@ -265,6 +281,8 @@ class Board(object):
 
 
 class Sudoku(object):
+    """Represents a Sudoku puzzle."""
+
     def __init__(self, board=None):
         self.board = board or self.get_generated_board()
 
@@ -343,6 +361,9 @@ class Sudoku(object):
 
 
 def main():
+    """The Sudoku solver's main function — started automatically when the
+    script is executed directly."""
+
     sudoku = Sudoku(
         Board.from_text(
             "..5.6.98." +
