@@ -318,6 +318,7 @@ class Sudoku(object):
     """Represents a Sudoku puzzle."""
 
     def __init__(self, board=None):
+        self._board = None
         self.board = board or self.get_generated_board()
 
     def get_board(self):
@@ -350,23 +351,22 @@ class Sudoku(object):
 
     def solve_cell_index_based(self):
         for idx in self.board.cells.empty_cell_indices:
-            cellists = self.board.get_celllists_at_cell_index(idx)
-            solutions = set(cellists[0].missing_numbers)
+            celllists = self.board.get_celllists_at_cell_index(idx)
+            missing_numbers = set(celllists[0].missing_numbers)
 
-            for celllist in cellists[1:]:
-                solutions &= set(celllist.missing_numbers)
+            for celllist in celllists[1:]:
+                missing_numbers &= set(celllist.missing_numbers)
 
-            if len(solutions) == 1:
-                self.board.cells[idx] = Cell(solutions.pop())
+            if len(missing_numbers) == 1:
+                self.board.cells[idx] = Cell(missing_numbers.pop())
 
     def solve_number_based(self):
         for idx in self.board.cells.empty_cell_indices:
-            cell_indices = None
+            celllists = self.board.get_celllists_at_cell_index(idx)
+            missing_numbers = set(celllists[0].missing_numbers)
 
-            for n, celllist in enumerate(
-                self.board.get_celllists_at_cell_index(idx)
-            ):
-                pass
+            # HIERO
+
 
     @staticmethod
     def get_generated_board():
