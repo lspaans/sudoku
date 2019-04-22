@@ -5,6 +5,42 @@
 import sys
 
 
+EASY = (
+    ".5.1968.." +
+    ".8.342956" +
+    ".36857142" +
+    ".6372.514" +
+    "427615389" +
+    "195.8326." +
+    "51297463." +
+    "378261.9." +
+    "..9538.2."
+)
+
+INSANE = (
+    "..5.6.98." +
+    "7.9.2.6.1" +
+    "42....7.." +
+    "..3.1...." +
+    "..74..3.8" +
+    "1........" +
+    "....7...." +
+    "6..1..89." +
+    ".....3.2."
+)
+
+HARDEST = (
+    "8........" +
+    "..36....." +
+    ".7..9.2.." +
+    ".5...7..." +
+    "....457.." +
+    "...1...3." +
+    "..1....68" +
+    "..85...1." +
+    ".9....4.."
+)
+
 class Unsolvable(Exception):
     """Raised when Sudoku cannot be solved"""
 
@@ -329,17 +365,7 @@ class Sudoku(object):
         """
         To be implemented
         """
-        return Board.from_text(
-            ".5.1968.." +
-            ".8.342956" +
-            ".36857142" +
-            ".6372.514" +
-            "427615389" +
-            "195.8326." +
-            "51297463." +
-            "378261.9." +
-            "..9538.2."
-        )
+        return Board.from_text(EASY)
 
     def __repr__(self):
         return "{}({})".format(type(self).__name__, repr(self.board))
@@ -364,19 +390,7 @@ def main():
     """The Sudoku solver's main function — started automatically when the
     script is executed directly."""
 
-    sudoku = Sudoku(
-        Board.from_text(
-            "..5.6.98." +
-            "7.9.2.6.1" +
-            "42....7.." +
-            "..3.1...." +
-            "..74..3.8" +
-            "1........" +
-            "....7...." +
-            "6..1..89." +
-            ".....3.2."
-        )
-    )
+    sudoku = Sudoku(Board.from_text(HARDEST))
     try:
         sudoku.solve()
     except Unsolvable as exc:
