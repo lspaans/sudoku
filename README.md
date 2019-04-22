@@ -1,4 +1,4 @@
 sudoku
 ======
 
-A 'sudoku'-solver written in Python.
+A Sudoku puzzle solver.
