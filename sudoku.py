@@ -343,7 +343,7 @@ class Sudoku(object):
         board_now = str(self.board)
 
         while self.board.empty_cell_indices and board_then != board_now:
-            self.solve_number_based()
+            self.solve_cell_index_based()
 
             board_then = board_now
             board_now = str(self.board)
@@ -351,7 +351,7 @@ class Sudoku(object):
         if self.board.empty_cell_indices:
             raise Unsolvable("**meh**")
 
-    def solve_number_based(self):
+    def solve_cell_index_based(self):
         for idx in self.board.empty_cell_indices:
             solutions = None
 
