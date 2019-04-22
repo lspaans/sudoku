@@ -20,7 +20,7 @@ class Cell(object):
         return self._value
 
     def set_value(self, value):
-        if not isinstance(value, int) or value < 0 or value > 9:
+        if not isinstance(value, int) or not 0 <= value <= 9:
             raise ValueError("invalid value: \"{}\"".format(value))
 
         self._value = value
