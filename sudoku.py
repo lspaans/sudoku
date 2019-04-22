@@ -267,9 +267,6 @@ class Board(object):
     def get_columns(self):
         return self._columns
 
-    def get_empty_cell_indices(self):
-        return [n for n, cell in enumerate(self.cells) if cell.value == 0]
-
     def get_grids(self):
         return self._grids
 
@@ -313,7 +310,6 @@ class Board(object):
     cells = property(get_cells)
     celllists = property(get_celllists, set_celllists)
     columns = property(get_columns)
-    empty_cell_indices = property(get_empty_cell_indices)
     grids = property(get_grids)
     rows = property(get_rows)
 
@@ -342,17 +338,18 @@ class Sudoku(object):
         board_then = ""
         board_now = str(self.board)
 
-        while self.board.empty_cell_indices and board_then != board_now:
+        while self.board.cells.empty_cell_indices and board_then != board_now:
             self.solve_cell_index_based()
+            self.solve_number_based()
 
             board_then = board_now
             board_now = str(self.board)
 
-        if self.board.empty_cell_indices:
+        if self.board.cells.empty_cell_indices:
             raise Unsolvable("**meh**")
 
     def solve_cell_index_based(self):
-        for idx in self.board.empty_cell_indices:
+        for idx in self.board.cells.empty_cell_indices:
             solutions = None
 
             for n, celllist in enumerate(
@@ -364,6 +361,12 @@ class Sudoku(object):
 
             if len(solutions) == 1:
                 self.board.cells[idx] = Cell(solutions.pop())
+
+    def solve_number_based(self):
+        for idx in self.board.cells.empty_cell_indices:
+            cell_indices = None
+
+
 
     @staticmethod
     def get_generated_board():
@@ -395,6 +398,8 @@ def main():
     """The Sudoku solver's main function — started automatically when the
     script is executed directly."""
 
+    #sudoku = Sudoku(Board.from_text(INSANE))
+    #sudoku = Sudoku(Board.from_text(EASY))
     sudoku = Sudoku(Board.from_text(HARDEST))
     try:
         sudoku.solve()
