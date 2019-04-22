@@ -341,24 +341,27 @@ class Sudoku(object):
         board_now = str(self.board)
 
         while self.board.empty_cell_indices and board_then != board_now:
-            for idx in self.board.empty_cell_indices:
-                solutions = None
-    
-                for n, celllist in enumerate(
-                    self.board.get_celllists_at_cell_index(idx)
-                ):
-                    if n == 0:
-                        solutions = set(celllist.missing_numbers)
-                    solutions &= set(celllist.missing_numbers)
-    
-                if len(solutions) == 1:
-                    self.board.cells[idx] = Cell(solutions.pop())
+            self.solve_number_based()
 
             board_then = board_now
             board_now = str(self.board)
 
         if self.board.empty_cell_indices:
             raise Unsolvable("**meh**")
+
+    def solve_number_based(self):
+        for idx in self.board.empty_cell_indices:
+            solutions = None
+
+            for n, celllist in enumerate(
+                self.board.get_celllists_at_cell_index(idx)
+            ):
+                if n == 0:
+                    solutions = set(celllist.missing_numbers)
+                solutions &= set(celllist.missing_numbers)
+
+            if len(solutions) == 1:
+                self.board.cells[idx] = Cell(solutions.pop())
 
     @staticmethod
     def get_generated_board():
