@@ -335,15 +335,15 @@ class Sudoku(object):
         sys.stdout.write(str(self))
 
     def solve(self):
-        board_then = ""
-        board_now = str(self.board)
+        board_then = []
+        board_now = [cell.value for cell in self.board.cells]
 
         while self.board.cells.empty_cell_indices and board_then != board_now:
             self.solve_cell_index_based()
             self.solve_number_based()
 
             board_then = board_now
-            board_now = str(self.board)
+            board_now = [cell.value for cell in self.board.cells]
 
         if self.board.cells.empty_cell_indices:
             raise Unsolvable("**meh**")
@@ -398,8 +398,8 @@ def main():
     """The Sudoku solver's main function — started automatically when the
     script is executed directly."""
 
-    #sudoku = Sudoku(Board.from_text(INSANE))
     #sudoku = Sudoku(Board.from_text(EASY))
+    #sudoku = Sudoku(Board.from_text(INSANE))
     sudoku = Sudoku(Board.from_text(HARDEST))
     try:
         sudoku.solve()
