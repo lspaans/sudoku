@@ -2,8 +2,6 @@
 
 import sys
 
-from collections import OrderedDict
-
 
 class Unsolvable(Exception):
     pass
